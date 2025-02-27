@@ -5,8 +5,24 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Shift Calculator",
-  description: "Calculate your shift earnings including overtime rates",
+  title: "ShiftFlow",
+  description: "Track your work hours and calculate earnings with ease",
+  icons: {
+    icon: [
+      {
+        url: "/icon.png",
+        href: "/icon.png",
+      },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [
+      {
+        url: "/apple-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
