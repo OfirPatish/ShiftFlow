@@ -7,7 +7,6 @@ import { WageConfig } from "../components/config/WageConfig";
 import { ShiftInput } from "../components/forms/ShiftInput";
 import { ShiftsList } from "../components/lists/shifts/ShiftsList";
 import { ThemeToggle } from "../components/common/ThemeToggle";
-import { DynamicThemeTutorial } from "../components/common/DynamicThemeTutorial";
 import { ShortcutsPanel } from "../components/common/ShortcutsPanel";
 
 export default function Home() {
@@ -40,7 +39,6 @@ export default function Home() {
               </section>
             </div>
           </div>
-          <DynamicThemeTutorial />
           <ShortcutsPanel />
         </main>
       </ShiftsProvider>

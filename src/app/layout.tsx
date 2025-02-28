@@ -30,12 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="no-transition">
       <body className={inter.className}>
-        <ThemeProvider>
-          {children}
-          <div id="theme-tutorial-container" suppressHydrationWarning>
-            {/* Theme tutorial will be rendered here client-side */}
-          </div>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
