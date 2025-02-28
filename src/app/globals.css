@@ -8,20 +8,74 @@
   --background-end-rgb: 243, 244, 246; /* gray-100 */
   --card-background: 255, 255, 255;
   --card-border: 243, 244, 246;
+  --transition-speed: 300ms;
+  --shortcut-key-bg: 229, 231, 235; /* gray-200 */
+  --shortcut-key-text: 31, 41, 55; /* gray-800 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 229, 231, 235; /* gray-200 */
-    --background-start-rgb: 17, 24, 39; /* gray-900 */
-    --background-end-rgb: 31, 41, 55; /* gray-800 */
-    --card-background: 31, 41, 55; /* gray-800 */
-    --card-border: 55, 65, 81; /* gray-700 */
-  }
+.dark {
+  --foreground-rgb: 229, 231, 235; /* gray-200 */
+  --background-start-rgb: 17, 24, 39; /* gray-900 */
+  --background-end-rgb: 31, 41, 55; /* gray-800 */
+  --card-background: 31, 41, 55; /* gray-800 */
+  --card-border: 55, 65, 81; /* gray-700 */
+  --shortcut-key-bg: 55, 65, 81; /* gray-700 */
+  --shortcut-key-text: 229, 231, 235; /* gray-200 */
+}
+
+/* Prevent transition during page load */
+.no-transition * {
+  transition: none !important;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
   min-height: 100vh;
+  transition: color var(--transition-speed), background var(--transition-speed);
+}
+
+/* Utility classes for theme transitions */
+@layer components {
+  .theme-transition {
+    @apply transition-colors duration-300;
+  }
+
+  .theme-transition-all {
+    @apply transition-all duration-300;
+  }
+
+  .theme-card {
+    @apply bg-white dark:bg-gray-800 
+           border border-gray-100 dark:border-gray-700 
+           shadow-sm rounded-lg
+           transition-colors duration-300;
+  }
+
+  .theme-text-primary {
+    @apply text-gray-800 dark:text-gray-100 transition-colors duration-300;
+  }
+
+  .theme-text-secondary {
+    @apply text-gray-600 dark:text-gray-400 transition-colors duration-300;
+  }
+
+  .shortcut-key {
+    @apply px-2 py-1 rounded text-sm font-medium
+           bg-gray-200 dark:bg-gray-700
+           text-gray-800 dark:text-gray-200
+           transition-colors duration-300;
+  }
+
+  .shortcuts-panel {
+    @apply fixed bottom-4 right-4 z-50;
+  }
+
+  .shortcuts-button {
+    @apply p-2 rounded-lg bg-blue-500 text-white 
+           hover:bg-blue-600 focus:outline-none 
+           focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+           shadow-lg transform hover:scale-105 active:scale-95 
+           transition-all duration-200 flex items-center space-x-2;
+  }
 }

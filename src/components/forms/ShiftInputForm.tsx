@@ -92,15 +92,15 @@ export function ShiftInputForm() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div className="theme-card p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add New Shift</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Enter the details of your work shift below</p>
+        <h2 className="text-xl font-semibold theme-text-primary">Add New Shift</h2>
+        <p className="text-sm theme-text-secondary mt-1">Enter the details of your work shift below</p>
       </div>
 
       {validationErrors.length > 0 && (
-        <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded">
-          <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+        <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded transition-colors duration-300">
+          <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
             {validationErrors.map((error, index) => (
               <li key={index}>{error}</li>
             ))}
@@ -110,7 +110,7 @@ export function ShiftInputForm() {
 
       <div className="space-y-6">
         <div>
-          <label className="block font-medium mb-2 text-gray-700 dark:text-gray-300">
+          <label className="block font-medium mb-2 theme-text-primary">
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -127,11 +127,11 @@ export function ShiftInputForm() {
             type="date"
             value={date}
             onChange={handleDateChange}
-            className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300"
           />
         </div>
 
-        <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-6 transition-colors duration-300">
           <div className="grid grid-cols-2 gap-6">
             <TimeInput
               label={
@@ -170,10 +170,10 @@ export function ShiftInputForm() {
           </div>
         </div>
 
-        <div className="border-t border-gray-100 dark:border-gray-700 pt-6 space-y-3">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-6 space-y-3 transition-colors duration-300">
           <button
             onClick={calculateShift}
-            className="w-full bg-blue-500 dark:bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+            className="w-full bg-blue-500 dark:bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-all duration-300 flex items-center justify-center gap-2 font-medium"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -189,7 +189,7 @@ export function ShiftInputForm() {
           {calculation && (
             <button
               onClick={saveShift}
-              className="w-full bg-green-500 dark:bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
+              className="w-full bg-green-500 dark:bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-all duration-300 flex items-center justify-center gap-2 font-medium"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />

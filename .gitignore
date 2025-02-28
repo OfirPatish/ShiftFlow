@@ -35,3 +35,6 @@ next-env.d.ts
 
 # documentation
 /docs 
+
+# project documentation
+RECOMMENDATIONS.md 
