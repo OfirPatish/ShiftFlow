@@ -2,80 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 31, 41, 55; /* gray-800 */
-  --background-start-rgb: 249, 250, 251; /* gray-50 */
-  --background-end-rgb: 243, 244, 246; /* gray-100 */
-  --card-background: 255, 255, 255;
-  --card-border: 243, 244, 246;
-  --transition-speed: 300ms;
-  --shortcut-key-bg: 229, 231, 235; /* gray-200 */
-  --shortcut-key-text: 31, 41, 55; /* gray-800 */
+/* Base styles */
+@layer base {
+  body {
+    @apply min-h-screen antialiased text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 transition-colors duration-200;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-slate-800 dark:text-white;
+  }
+
+  a {
+    @apply text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors;
+  }
 }
 
-.dark {
-  --foreground-rgb: 229, 231, 235; /* gray-200 */
-  --background-start-rgb: 17, 24, 39; /* gray-900 */
-  --background-end-rgb: 31, 41, 55; /* gray-800 */
-  --card-background: 31, 41, 55; /* gray-800 */
-  --card-border: 55, 65, 81; /* gray-700 */
-  --shortcut-key-bg: 55, 65, 81; /* gray-700 */
-  --shortcut-key-text: 229, 231, 235; /* gray-200 */
-}
-
-/* Prevent transition during page load */
-.no-transition * {
-  transition: none !important;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
-  min-height: 100vh;
-  transition: color var(--transition-speed), background var(--transition-speed);
-}
-
-/* Utility classes for theme transitions */
+/* Common component styles */
 @layer components {
-  .theme-transition {
-    @apply transition-colors duration-300;
-  }
-
-  .theme-transition-all {
-    @apply transition-all duration-300;
-  }
-
   .theme-card {
-    @apply bg-white dark:bg-gray-800 
-           border border-gray-100 dark:border-gray-700 
-           shadow-sm rounded-lg
-           transition-colors duration-300;
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm transition-all duration-200;
   }
 
-  .theme-text-primary {
-    @apply text-gray-800 dark:text-gray-100 transition-colors duration-300;
+  .btn {
+    @apply px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
-  .theme-text-secondary {
-    @apply text-gray-600 dark:text-gray-400 transition-colors duration-300;
+  .btn-primary {
+    @apply btn bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600;
   }
 
-  .shortcut-key {
-    @apply px-2 py-1 rounded text-sm font-medium
-           bg-gray-200 dark:bg-gray-700
-           text-gray-800 dark:text-gray-200
-           transition-colors duration-300;
+  .btn-secondary {
+    @apply btn bg-slate-200 hover:bg-slate-300 text-slate-800 focus:ring-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white;
   }
 
-  .shortcuts-panel {
-    @apply fixed bottom-4 right-4 z-50;
+  .input {
+    @apply block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm 
+    focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400
+    bg-white dark:bg-slate-800 text-slate-900 dark:text-white transition-colors;
   }
+}
 
-  .shortcuts-button {
-    @apply p-2 rounded-lg bg-blue-500 text-white 
-           hover:bg-blue-600 focus:outline-none 
-           focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-           shadow-lg transform hover:scale-105 active:scale-95 
-           transition-all duration-200 flex items-center space-x-2;
+/* Utility classes */
+@layer utilities {
+  .no-transition {
+    transition: none !important;
   }
 }

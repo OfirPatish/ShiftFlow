@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "../context/themeContext";
+import { AppProvider } from "../core/context/AppProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+// Use Inter font with extended Latin character support and variable weights
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "ShiftFlow",
@@ -28,9 +33,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="no-transition">
-      <body className={inter.className}>
-        <ThemeProvider>{children}</ThemeProvider>
+    <html lang="en" className={`${inter.variable} scroll-smooth`}>
+      <body className={`${inter.className} antialiased`}>
+        <AppProvider>{children}</AppProvider>
       </body>
     </html>
   );
