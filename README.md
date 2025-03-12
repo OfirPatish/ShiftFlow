@@ -7,14 +7,16 @@
 
 ShiftFlow is a user-friendly application designed to help individuals in Israel track their work shifts, calculate income, and manage multiple employment sources efficiently.
 
+## 🔗 Live Demo
+
+**[Try ShiftFlow Live](https://shift-flow.vercel.app/)**
+
 ## 🚀 Features
 
 - **User Authentication** - Secure login and registration system
 - **Employer Management** - Add, edit, and manage multiple employers
 - **Shift Tracking** - Record shifts with start/end times and breaks
-- **Calendar View** - Visualize your shifts in a calendar format
 - **Income Calculations** - Automatic income calculations based on rates
-- **Time Clock** - Clock in/out functionality with reminders
 - **Dashboard Analytics** - Visual reports of hours worked and earnings
 - **Responsive Design** - Works on desktop, tablet, and mobile devices
 
@@ -119,12 +121,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📧 Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_twitter) - email@example.com
-
-Project Link: [https://github.com/yourusername/shiftflow](https://github.com/yourusername/shiftflow)
 
 ## 🙏 Acknowledgements
 
