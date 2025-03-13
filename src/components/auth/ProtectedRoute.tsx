@@ -1,8 +1,8 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
@@ -13,19 +13,34 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const isRedirecting = useRef(false);
 
   useEffect(() => {
     // Check if the session is loading
     if (status === 'loading') return;
 
-    // If the user is not authenticated, redirect to login
+    // Prevent multiple redirects
+    if (isRedirecting.current) return;
+
+    // Case 1: No session - redirect to login
     if (!session) {
+      isRedirecting.current = true;
       router.push(`/auth/login?callbackUrl=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
+    // Case 2: Session exists but is expired
+    if (session.expired) {
+      isRedirecting.current = true;
+      // Sign out properly first
+      signOut({ redirect: false }).then(() => {
+        router.push(`/auth/login?callbackUrl=${encodeURIComponent(pathname)}`);
+      });
     }
   }, [session, status, router, pathname]);
 
   // Show loading state while checking session
-  if (status === 'loading') {
+  if (status === 'loading' || isRedirecting.current) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -36,6 +51,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Show children only if authenticated
-  return session ? <>{children}</> : null;
+  // Show children only if authenticated and session is not expired
+  return session && !session.expired ? <>{children}</> : null;
 }
