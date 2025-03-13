@@ -1,174 +1,236 @@
 'use client';
 
-import React from 'react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRegister } from '@/hooks/useRegister';
+import {
+  FormField,
+  PasswordToggle,
+  PasswordStrength,
+  ErrorMessage,
+  AuthLayout,
+  AuthHeader,
+  FormContainer,
+  SubmitButton,
+} from '@/components/auth/FormComponents';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // Track field focus states
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    isLoading,
+    showPassword,
+    showConfirmPassword,
+    passwordStrength,
+    passwordFocused,
+    nameInputRef,
+    getPasswordStrengthColor,
+    getPasswordStrengthText,
+    handlePasswordFocus,
+    handlePasswordBlur,
+    togglePasswordVisibility,
+    toggleConfirmPasswordVisibility,
+    handleSubmit,
+    isValidFullName,
+    isValidEmail,
+    doPasswordsMatch,
+  } = useRegister();
 
-    // Basic validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Send registration request to the API
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      // Redirect to login page on success
-      router.push('/auth/login?registered=true');
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An error occurred during registration');
-      }
-      setIsLoading(false);
-    }
-  };
+  // Handle focus states
+  const handleNameFocus = () => setNameFocused(true);
+  const handleNameBlur = () => setNameFocused(false);
+  const handleEmailFocus = () => setEmailFocused(true);
+  const handleEmailBlur = () => setEmailFocused(false);
+  const handleConfirmPasswordFocus = () => setConfirmPasswordFocused(true);
+  const handleConfirmPasswordBlur = () => setConfirmPasswordFocused(false);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900">ShiftFlow</h1>
-          <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
-            Create your account
-          </h2>
-        </div>
+    <AuthLayout>
+      {/* Header */}
+      <AuthHeader title="Create an account" subtitle="Start managing your shifts efficiently" />
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          </div>
-        )}
+      {/* Error message */}
+      <ErrorMessage error={error} />
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <input type="hidden" name="remember" defaultValue="true" />
-          <div className="space-y-3">
+      {/* Registration form */}
+      <FormContainer>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {/* Name field with helper text */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
+              <FormField
                 id="name"
-                name="name"
+                label="Full name"
                 type="text"
-                autoComplete="name"
-                required
-                className="relative block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mt-1"
-                placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="First and Last name"
+                inputRef={nameInputRef}
+                onFocus={handleNameFocus}
+                onBlur={handleNameBlur}
               />
+              {(nameFocused || name) && (
+                <div className="mt-1 flex items-center text-xs">
+                  {name && isValidFullName(name) ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-400 mr-1" />
+                      <span className="text-green-400">Valid full name</span>
+                    </>
+                  ) : (
+                    <span
+                      className={`text-gray-400 ${
+                        !isValidFullName(name) && name ? 'text-yellow-400' : ''
+                      }`}
+                    >
+                      Please enter both your first and last name
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Email field */}
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
+              <FormField
+                id="email"
+                label="Email address"
                 type="email"
-                autoComplete="email"
-                required
-                className="relative block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mt-1"
-                placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                onFocus={handleEmailFocus}
+                onBlur={handleEmailBlur}
               />
+              {(emailFocused || email) && (
+                <div className="mt-1 flex items-center text-xs">
+                  {email && isValidEmail(email) ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-400 mr-1" />
+                      <span className="text-green-400">Valid email format</span>
+                    </>
+                  ) : (
+                    email && (
+                      <>
+                        <AlertCircle className="h-3.5 w-3.5 text-yellow-400 mr-1" />
+                        <span className="text-yellow-400">Please enter a valid email</span>
+                      </>
+                    )
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Password field with strength meter */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
+              <FormField
                 id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="relative block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mt-1"
-                placeholder="At least 6 characters"
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a strong password"
+                onFocus={handlePasswordFocus}
+                onBlur={handlePasswordBlur}
+                rightElement={
+                  <PasswordToggle
+                    showPassword={showPassword}
+                    toggleVisibility={togglePasswordVisibility}
+                  />
+                }
               />
+              {(passwordFocused || password) && (
+                <PasswordStrength
+                  password={password}
+                  strength={passwordStrength}
+                  getColor={getPasswordStrengthColor}
+                  getText={getPasswordStrengthText}
+                />
+              )}
             </div>
+
+            {/* Confirm password field */}
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
+              <FormField
                 id="confirm-password"
-                name="confirm-password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="relative block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 mt-1"
-                placeholder="Confirm your password"
+                label="Confirm password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                onFocus={handleConfirmPasswordFocus}
+                onBlur={handleConfirmPasswordBlur}
+                rightElement={
+                  <PasswordToggle
+                    showPassword={showConfirmPassword}
+                    toggleVisibility={toggleConfirmPasswordVisibility}
+                  />
+                }
               />
+              {(confirmPasswordFocused || confirmPassword) && password && confirmPassword && (
+                <div className="mt-1 flex items-center text-xs">
+                  {doPasswordsMatch() ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-400 mr-1" />
+                      <span className="text-green-400">Passwords match</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3.5 w-3.5 text-red-400 mr-1" />
+                      <span className="text-red-400">Passwords don't match</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
-          </div>
-        </form>
+          {/* Submit button */}
+          <SubmitButton
+            isLoading={isLoading}
+            loadingText="Creating account..."
+            text="Create account"
+          />
 
-        <p className="mt-2 text-center text-sm text-gray-600">
+          {/* Terms and conditions */}
+          <p className="text-xs text-gray-400 text-center">
+            By creating an account, you agree to our{' '}
+            <a href="#" className="text-primary hover:text-primary-light">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="#" className="text-primary hover:text-primary-light">
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </form>
+      </FormContainer>
+
+      {/* Sign in link */}
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-400">
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Sign in here
+          <Link
+            href="/auth/login"
+            className="font-medium text-primary hover:text-primary-light transition-colors"
+          >
+            Sign in
           </Link>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

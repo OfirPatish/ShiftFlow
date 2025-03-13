@@ -1,152 +1,147 @@
 'use client';
 
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useLogin } from '@/hooks/useLogin';
+import {
+  FormField,
+  Checkbox,
+  PasswordToggle,
+  ErrorMessage,
+  AuthLayout,
+  AuthHeader,
+  FormContainer,
+  SubmitButton,
+} from '@/components/auth/FormComponents';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // Track field focus states
+  const [emailFocused, setEmailFocused] = useState(false);
 
-  // Check for expired sessions and redirect
-  useEffect(() => {
-    if (session?.expired) {
-      // If session is marked as expired, show a message
-      setError('Your session has expired. Please sign in again.');
-    }
-  }, [session]);
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    rememberMe,
+    setRememberMe,
+    error,
+    isLoading,
+    showPassword,
+    emailInputRef,
+    handleSubmit,
+    togglePasswordVisibility,
+    isValidEmail,
+  } = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-        callbackUrl: '/dashboard',
-        remember: rememberMe,
-      });
-
-      if (result?.error) {
-        setError('Invalid email or password');
-        setIsLoading(false);
-        return;
-      }
-
-      // Redirect to dashboard on successful login
-      router.push('/dashboard');
-      router.refresh();
-    } catch (error) {
-      setError('An error occurred during login');
-      setIsLoading(false);
-    }
-  };
+  // Handle focus states
+  const handleEmailFocus = () => setEmailFocused(true);
+  const handleEmailBlur = () => setEmailFocused(false);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900">ShiftFlow</h1>
-          <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
+    <AuthLayout>
+      {/* Header */}
+      <AuthHeader
+        title="Sign in to your account"
+        subtitle="Track your shifts and manage your schedule"
+      />
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          </div>
-        )}
+      {/* Error message */}
+      <ErrorMessage error={error} />
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+      {/* Login form */}
+      <FormContainer>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <input type="hidden" name="remember" defaultValue={rememberMe.toString()} />
-          <div className="-space-y-px rounded-md shadow-sm">
+
+          <div className="space-y-4">
+            {/* Email field */}
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
+              <FormField
                 id="email-address"
-                name="email"
+                label="Email address"
                 type="email"
-                autoComplete="email"
-                required
-                className="relative block w-full rounded-t-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                inputRef={emailInputRef}
+                onFocus={handleEmailFocus}
+                onBlur={handleEmailBlur}
               />
+              {(emailFocused || email) && email && (
+                <div className="mt-1 flex items-center text-xs">
+                  {isValidEmail(email) ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-400 mr-1" />
+                      <span className="text-green-400">Valid email format</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3.5 w-3.5 text-yellow-400 mr-1" />
+                      <span className="text-yellow-400">Please enter a valid email</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Password field with toggle and forgot password link */}
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                  Password
+                </label>
+                <a
+                  href="#"
+                  className="text-xs font-medium text-primary hover:text-primary-light transition-colors"
+                >
+                  Forgot password?
+                </a>
+              </div>
+              <FormField
                 id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="relative block w-full rounded-b-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                rightElement={
+                  <PasswordToggle
+                    showPassword={showPassword}
+                    toggleVisibility={togglePasswordVisibility}
+                  />
+                }
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot your password?
-              </a>
-            </div>
+          {/* Remember me checkbox - centered */}
+          <div className="flex justify-center">
+            <Checkbox
+              id="remember-me"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              label="Remember me"
+            />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
+          {/* Submit button */}
+          <SubmitButton isLoading={isLoading} loadingText="Signing in..." text="Sign in" />
         </form>
+      </FormContainer>
 
-        <p className="text-sm text-gray-500">
-          Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
-            Register
+      {/* Sign up link */}
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-400">
+          Don't have an account?{' '}
+          <Link
+            href="/auth/register"
+            className="font-medium text-primary hover:text-primary-light transition-colors"
+          >
+            Sign up now
           </Link>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
