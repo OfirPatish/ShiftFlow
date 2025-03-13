@@ -57,7 +57,6 @@ employerSchema.statics.findActiveForUser = async function (userId) {
 
 // More reliable model registration for serverless environments
 // This approach helps prevent "Schema hasn't been registered for model" errors
-const Employer =
-  (models.Employer as mongoose.Model<IEmployer>) || model<IEmployer>('Employer', employerSchema);
+const Employer = mongoose.models?.Employer || mongoose.model('Employer', employerSchema);
 
 export default Employer;

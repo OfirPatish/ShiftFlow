@@ -74,6 +74,6 @@ rateSchema.statics.findApplicableRate = async function (userId, employerId, date
 
 // More reliable model registration for serverless environments
 // This approach helps prevent "Schema hasn't been registered for model" errors
-const Rate = (models.Rate as mongoose.Model<IRate>) || model<IRate>('Rate', rateSchema);
+const Rate = mongoose.models?.Rate || mongoose.model('Rate', rateSchema);
 
 export default Rate;

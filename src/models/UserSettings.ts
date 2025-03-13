@@ -43,7 +43,6 @@ userSettingsSchema.index({ userId: 1 });
 // More reliable model registration for serverless environments
 // This approach helps prevent "Schema hasn't been registered for model" errors
 const UserSettings =
-  (models.UserSettings as mongoose.Model<IUserSettings>) ||
-  model<IUserSettings>('UserSettings', userSettingsSchema);
+  mongoose.models?.UserSettings || mongoose.model('UserSettings', userSettingsSchema);
 
 export default UserSettings;

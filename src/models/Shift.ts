@@ -136,8 +136,7 @@ shiftSchema.statics.findUpcoming = async function (userId, limit = 5) {
     .populate('rateId', 'baseRate currency');
 };
 
-// More reliable model registration for serverless environments
 // This approach helps prevent "Schema hasn't been registered for model" errors
-const Shift = (models.Shift as mongoose.Model<IShift>) || model<IShift>('Shift', shiftSchema);
+const Shift = mongoose.models?.Shift || mongoose.model('Shift', shiftSchema);
 
 export default Shift;

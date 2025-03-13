@@ -51,6 +51,6 @@ const userSchema = new Schema<IUser>(
 
 // More reliable model registration for serverless environments
 // This approach helps prevent "Schema hasn't been registered for model" errors
-const User = (models.User as mongoose.Model<IUser>) || model<IUser>('User', userSchema);
+const User = mongoose.models?.User || mongoose.model('User', userSchema);
 
 export default User;
