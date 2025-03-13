@@ -5,7 +5,8 @@ import { ReactNode } from 'react';
 import { FormInput } from '@/components/ui/FormInput';
 import { TextArea } from '@/components/ui/TextArea';
 import { Check, Trash2 } from 'lucide-react';
-import { TimeInput } from '@/components/ui/TimeInput';
+import { TimePickerWheel } from '@/components/ui/TimePickerWheel';
+import { DatePickerWheel } from '@/components/ui/DatePickerWheel';
 import { Button } from '@/components/ui/Button';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { useEmployers } from '@/hooks/useEmployers';
@@ -196,10 +197,16 @@ export default function ShiftForm({
 
       // Validate start time is before end time
       if (startTime && endTime) {
-        const startDateTime = parseISO(data.startTime as string);
-        const endDateTime = parseISO(data.endTime as string);
+        // Simpler approach: Convert times to comparable numeric values
+        const [startHour, startMinute] = startTime.split(':').map((num) => parseInt(num, 10));
+        const [endHour, endMinute] = endTime.split(':').map((num) => parseInt(num, 10));
 
-        if (!isBefore(startDateTime, endDateTime)) {
+        // Convert to minutes since midnight for easy comparison
+        const startTotalMinutes = startHour * 60 + startMinute;
+        const endTotalMinutes = endHour * 60 + endMinute;
+
+        // End time should be greater than start time
+        if (endTotalMinutes <= startTotalMinutes) {
           setError('endTime', { message: 'End time must be after start time' });
           setIsSubmitting(false);
           return;
@@ -232,35 +239,43 @@ export default function ShiftForm({
         <input type="hidden" {...register('rateId')} />
 
         {/* Date Input */}
-        <FormInput
+        <DatePickerWheel
           label="Shift Date"
-          type="date"
           id="shiftDate"
           value={startDate}
-          onChange={handleDateChange}
+          onChange={(value) => {
+            setStartDate(value);
+            // Clear date error when user enters a valid date
+            if (value) {
+              setDateError(null);
+            } else {
+              setDateError('Date is required');
+            }
+          }}
           error={!!dateError}
           helperText={dateError || ''}
+          required
         />
 
         {/* Time Inputs */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Start Time */}
-          <TimeInput
+          <TimePickerWheel
             label="Start Time"
             id="startTime"
             value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
+            onChange={(value) => setStartTime(value)}
             error={!!errors.startTime}
             helperText={errors.startTime ? 'Start time is required' : ''}
             required
           />
 
           {/* End Time */}
-          <TimeInput
+          <TimePickerWheel
             label="End Time"
             id="endTime"
             value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
+            onChange={(value) => setEndTime(value)}
             error={!!errors.endTime}
             helperText={
               errors.endTime ? errors.endTime.message?.toString() || 'End time is required' : ''

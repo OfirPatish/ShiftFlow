@@ -17,7 +17,8 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
 
   // Format day and date for display
   const dayDateDisplay = formatDayDate(startDate);
-  const fullDateDisplay = formatFullDate(startDate);
+  // We'll use the shorter format for both mobile and desktop
+  // const fullDateDisplay = formatFullDate(startDate);
 
   // Format time range
   const timeRange = formatTimeRange(startDate, endDate);
@@ -36,7 +37,8 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
     shift,
     onClick,
     dayDateDisplay,
-    fullDateDisplay,
+    // Use dayDateDisplay for both mobile and desktop
+    fullDateDisplay: dayDateDisplay,
     timeRange,
     hourlyRateDisplay,
     earningsAmount,
