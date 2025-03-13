@@ -3,10 +3,9 @@ import { getServerSession } from 'next-auth';
 import { connectToDatabase } from '@/lib/databaseConnection';
 import Employer from '@/models/Employer';
 import { authOptions } from '@/lib/authConfig';
-import mongoose from 'mongoose';
 
 // GET /api/employers - Get all employers for the current user
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -24,7 +23,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(employers);
   } catch (error) {
-    console.error('Error fetching employers:', error);
     return NextResponse.json({ error: 'Failed to fetch employers' }, { status: 500 });
   }
 }
@@ -58,7 +56,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newEmployer, { status: 201 });
   } catch (error) {
-    console.error('Error creating employer:', error);
     return NextResponse.json({ error: 'Failed to create employer' }, { status: 500 });
   }
 }

@@ -189,7 +189,7 @@ export default function RegisterPage() {
                   ) : (
                     <>
                       <AlertCircle className="h-3.5 w-3.5 text-red-400 mr-1" />
-                      <span className="text-red-400">Passwords don't match</span>
+                      <span className="text-red-400">Passwords don&apos;t match</span>
                     </>
                   )}
                 </div>
@@ -214,7 +214,6 @@ export default function RegisterPage() {
             <a href="#" className="text-primary hover:text-primary-light">
               Privacy Policy
             </a>
-            .
           </p>
         </form>
       </FormContainer>

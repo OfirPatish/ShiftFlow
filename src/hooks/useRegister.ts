@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
 export function useRegister() {
   const router = useRouter();

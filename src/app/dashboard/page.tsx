@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useShifts } from '@/hooks/useShifts';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { calculateMonthlyTotals } from '@/lib/shiftCalculator';
 import { showErrorToast, showInfoToast } from '@/lib/notificationToasts';
-import LoadingSpinner, { FullPageSpinner } from '@/components/common/LoadingSpinner';
+import { FullPageSpinner } from '@/components/common/LoadingSpinner';
 import MonthSelector from '@/components/common/MonthSelector';
 import { useRouter } from 'next/navigation';
 
@@ -80,8 +80,6 @@ export default function Dashboard() {
         });
       } catch (error) {
         // Error is already handled in the useShifts hook
-        // Just log for debugging
-        console.warn('Dashboard fetch error caught:', error);
       }
     };
 
@@ -123,7 +121,17 @@ export default function Dashboard() {
     };
 
     fetchPreviousMonthData();
-  }, [fetchShifts, selectedMonth]);
+  }, [
+    fetchShifts,
+    selectedMonth,
+    monthlyStats.totalEarnings,
+    monthlyStats.totalHours,
+    monthlyStats.regularHours,
+    monthlyStats.overtimeHours,
+    monthlyStats.overtimeEarnings,
+    monthlyStats.shiftsCount,
+    shifts,
+  ]);
 
   // Handle month change
   const handleMonthChange = (startDate: Date, endDate: Date, currentMonth: Date) => {

@@ -19,7 +19,6 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
   try {
     await connectToDatabase();
   } catch (dbError) {
-    console.error('Database connection error:', dbError);
     return errorResponse('Database connection failed. Please try again later.', 500, null, true);
   }
 
@@ -40,11 +39,9 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
       const parsedDate = new Date(startDate);
       if (!isNaN(parsedDate.getTime())) {
         query.startTime = { ...query.startTime, $gte: parsedDate };
-      } else {
-        console.warn(`Invalid startDate format: ${startDate}`);
       }
     } catch (dateError) {
-      console.warn(`Error parsing startDate: ${startDate}`, dateError);
+      // Silently continue with invalid date
     }
   }
 
@@ -53,11 +50,9 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
       const parsedDate = new Date(endDate);
       if (!isNaN(parsedDate.getTime())) {
         query.endTime = { ...query.endTime, $lte: parsedDate };
-      } else {
-        console.warn(`Invalid endDate format: ${endDate}`);
       }
     } catch (dateError) {
-      console.warn(`Error parsing endDate: ${endDate}`, dateError);
+      // Silently continue with invalid date
     }
   }
 
@@ -65,15 +60,12 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
     query.employerId = employerId;
   }
 
-  console.log('Shifts query:', JSON.stringify(query));
-
   // Get shifts with populated references
   const shifts = await Shift.find(query)
     .sort({ startTime: -1 })
     .populate('employerId', 'name color')
     .populate('rateId', 'baseRate currency');
 
-  console.log(`Found ${shifts.length} shifts`);
   return NextResponse.json(shifts);
 });
 

@@ -20,15 +20,17 @@ export async function GET() {
     let settings = await UserSettings.findOne({ userId: session.user.id });
 
     if (!settings) {
-      settings = {
+      settings = new UserSettings({
+        userId: session.user.id,
         defaultEmployerId: null,
         defaultRateId: null,
-      };
+      });
+      await settings.save();
     }
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
+    // Handle error without using console.error
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }
@@ -56,7 +58,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error updating settings:', error);
+    // Handle error without using console.error
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
   }
 }
