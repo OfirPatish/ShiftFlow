@@ -1,4 +1,4 @@
-import mongoose, { Schema, models } from 'mongoose';
+import mongoose, { Schema, models, model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 /**
@@ -40,8 +40,10 @@ const userSettingsSchema = new Schema<IUserSettings>(
 // Create an index for faster lookups by user ID
 userSettingsSchema.index({ userId: 1 });
 
-// Prevent duplicate model compilation when hot reloading in development
+// More reliable model registration for serverless environments
+// This approach helps prevent "Schema hasn't been registered for model" errors
 const UserSettings =
-  models.UserSettings || mongoose.model<IUserSettings>('UserSettings', userSettingsSchema);
+  (models.UserSettings as mongoose.Model<IUserSettings>) ||
+  model<IUserSettings>('UserSettings', userSettingsSchema);
 
 export default UserSettings;

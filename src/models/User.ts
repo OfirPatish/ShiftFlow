@@ -1,4 +1,4 @@
-import mongoose, { Schema, models } from 'mongoose';
+import mongoose, { Schema, models, model } from 'mongoose';
 
 /**
  * Interface representing a user account in the system
@@ -49,7 +49,8 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// Prevent duplicate model compilation when hot reloading in development
-const User = models.User || mongoose.model<IUser>('User', userSchema);
+// More reliable model registration for serverless environments
+// This approach helps prevent "Schema hasn't been registered for model" errors
+const User = (models.User as mongoose.Model<IUser>) || model<IUser>('User', userSchema);
 
 export default User;

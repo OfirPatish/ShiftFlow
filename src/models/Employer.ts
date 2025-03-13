@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, Document } from 'mongoose';
+import mongoose, { Schema, models, Document, model } from 'mongoose';
 
 /**
  * Interface representing an employer entity in the system
@@ -55,7 +55,9 @@ employerSchema.statics.findActiveForUser = async function (userId) {
   return this.find({ userId, isActive: true }).sort({ name: 1 });
 };
 
-// Prevent duplicate model compilation when hot reloading in development
-const Employer = models.Employer || mongoose.model<IEmployer>('Employer', employerSchema);
+// More reliable model registration for serverless environments
+// This approach helps prevent "Schema hasn't been registered for model" errors
+const Employer =
+  (models.Employer as mongoose.Model<IEmployer>) || model<IEmployer>('Employer', employerSchema);
 
 export default Employer;

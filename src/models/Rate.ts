@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, Document } from 'mongoose';
+import mongoose, { Schema, models, Document, model } from 'mongoose';
 
 /**
  * Interface representing a pay rate configuration for a specific employer
@@ -72,7 +72,8 @@ rateSchema.statics.findApplicableRate = async function (userId, employerId, date
   }).sort({ effectiveDate: -1 });
 };
 
-// Prevent duplicate model compilation when hot reloading in development
-const Rate = models.Rate || mongoose.model<IRate>('Rate', rateSchema);
+// More reliable model registration for serverless environments
+// This approach helps prevent "Schema hasn't been registered for model" errors
+const Rate = (models.Rate as mongoose.Model<IRate>) || model<IRate>('Rate', rateSchema);
 
 export default Rate;
