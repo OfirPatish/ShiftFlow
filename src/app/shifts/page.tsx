@@ -2,7 +2,7 @@
 
 import { useShiftManager } from '@/hooks/useShiftManager';
 import { FullPageSpinner } from '@/components/common/LoadingSpinner';
-import ShiftsTable from '@/components/shifts/ShiftsTable';
+import ShiftsList from '@/components/shifts/ShiftsList';
 import ShiftModal from '@/components/shifts/ShiftModal';
 import MonthSelector from '@/components/common/MonthSelector';
 import { Button } from '@/components/ui/Button';
@@ -35,15 +35,15 @@ export default function Shifts() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-16 xl:px-24">
+    <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-16 xl:px-24">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-3 sm:gap-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-8 gap-3 sm:gap-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100 mb-2">Shifts</h1>
-          <p className="text-gray-400">Track and manage your work shifts</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-100 mb-1 sm:mb-2">Shifts</h1>
+          <p className="text-sm sm:text-base text-gray-400">Track and manage your work shifts</p>
         </div>
-        <div>
-          <Button onClick={handleAddShift} variant="primary">
+        <div className="w-full sm:w-auto">
+          <Button onClick={handleAddShift} variant="primary" className="w-full sm:w-auto">
             Add Shift
           </Button>
         </div>
@@ -52,17 +52,13 @@ export default function Shifts() {
       {/* Main Content - Centered */}
       <div className="max-w-4xl mx-auto">
         {/* Month Selector - Centered */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-4 sm:mb-8 overflow-x-auto pb-2">
           <MonthSelector currentDate={selectedMonth} onChange={handleMonthChange} />
         </div>
 
         {/* Content Section with enhanced styling */}
-        <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-xl overflow-hidden">
-          {shifts.length === 0 ? (
-            <EmptyStateContent selectedMonth={selectedMonth} onAddAction={handleAddShift} />
-          ) : (
-            <ShiftsTable shifts={shifts} onShiftClick={handleShiftClick} />
-          )}
+        <div className="sm:bg-gray-800/30 sm:backdrop-blur-sm sm:rounded-xl sm:border sm:border-gray-700/40 sm:shadow-xl sm:overflow-hidden sm:p-4 p-0">
+          <ShiftsList shifts={shifts} onShiftClick={handleShiftClick} />
         </div>
       </div>
 

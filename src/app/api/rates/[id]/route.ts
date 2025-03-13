@@ -106,6 +106,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           { $set: { isDefault: false } }
         );
       }
+      // If trying to unset default status, ensure it's not the only default rate
+      else if (data.isDefault === false && rate.isDefault === true) {
+        // Count how many default rates exist for this employer
+        const defaultRatesCount = await Rate.countDocuments({
+          userId: rate.userId,
+          employerId: rate.employerId,
+          isDefault: true,
+        });
+
+        // If this is the only default rate, prevent unsetting
+        if (defaultRatesCount <= 1) {
+          return NextResponse.json(
+            { error: 'Cannot unset the only default rate. Set another rate as default first.' },
+            { status: 400 }
+          );
+        }
+      }
       rate.isDefault = data.isDefault;
     }
 

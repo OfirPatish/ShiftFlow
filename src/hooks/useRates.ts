@@ -142,6 +142,24 @@ export function useRates(employerId?: string) {
     try {
       setError(null);
 
+      // If trying to unset a default rate, check if it's the only default rate
+      if (formData.isDefault === false) {
+        const existingRate = rates.find((r) => r._id === id);
+        if (existingRate?.isDefault) {
+          // Count how many default rates exist for this employer
+          const defaultRates = rates.filter(
+            (r) => r.employerId === existingRate.employerId && r.isDefault
+          );
+
+          // If this is the only default rate, prevent the update
+          if (defaultRates.length <= 1) {
+            throw new Error(
+              'Cannot unset the only default rate. Set another rate as default first.'
+            );
+          }
+        }
+      }
+
       const response = await fetch(`/api/rates/${id}`, {
         method: 'PATCH',
         headers: {

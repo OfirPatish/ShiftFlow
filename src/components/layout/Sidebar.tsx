@@ -10,10 +10,10 @@ import {
   Briefcase,
   Home,
   Settings,
-  DollarSign,
   CircleUser,
   User,
   LogOut,
+  DollarSign,
 } from 'lucide-react';
 
 interface SidebarProps {}

@@ -2,20 +2,16 @@
  * Currency Formatting Utilities
  *
  * This file provides a collection of functions for formatting currency values
- * across the application. It supports multiple currencies with locale-aware
- * formatting and symbol display options. The default configuration is optimized
- * for Israeli Shekel (ILS) with Hebrew locale.
+ * across the application. The application only supports Israeli Shekel (ILS).
  */
 
 /**
  * Options for customizing currency formatting
  */
 interface FormatCurrencyOptions {
-  /** Currency code (default: 'ILS') */
-  currency?: string;
   /** Locale for number formatting (default: 'he-IL') */
   locale?: string;
-  /** Whether to show currency symbol (default: true) */
+  /** Whether to show currency symbol (default: false) */
   displaySymbol?: boolean;
   /** Minimum digits after decimal point (default: 2) */
   minimumFractionDigits?: number;
@@ -24,144 +20,71 @@ interface FormatCurrencyOptions {
 }
 
 /**
- * Formats a number as currency with customizable options
+ * Formats a number for display
  *
- * This is the core formatting function that all other currency
- * formatters use internally. It provides flexible options for
- * displaying currency values according to locale conventions.
+ * This function formats a number as a decimal value.
+ * Use this with the shekel symbol (₪) for consistent currency display.
  *
- * @param amount - The number to format as currency
- * @param options - Formatting options (currency, locale, etc.)
- * @returns Formatted currency string
- *
- * @example
- * // Basic usage (formats as ₪100.00)
- * formatCurrency(100)
+ * @param amount - The number to format
+ * @param options - Formatting options
+ * @returns Formatted numeric string
  *
  * @example
- * // Custom currency and locale (formats as $100.00)
- * formatCurrency(100, { currency: 'USD', locale: 'en-US' })
+ * // Basic usage (formats as number only)
+ * formatCurrency(100) // Returns "100.00"
+ *
+ * @example
+ * // For displaying currency prepend the ₪ symbol
+ * `₪${formatCurrency(100)}`
  */
 export function formatCurrency(amount: number, options: FormatCurrencyOptions = {}): string {
   const {
-    currency = 'ILS',
     locale = 'he-IL',
-    displaySymbol = true,
+    displaySymbol = false,
     minimumFractionDigits = 2,
     maximumFractionDigits = 2,
   } = options;
 
+  // Always use style: 'decimal' to format the number only
+  // The ₪ symbol should be added manually where needed
   return new Intl.NumberFormat(locale, {
     style: displaySymbol ? 'currency' : 'decimal',
-    currency: displaySymbol ? currency : undefined,
+    currency: displaySymbol ? 'ILS' : undefined,
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(amount);
 }
 
 /**
- * Formats a number as Israeli Shekel (ILS)
+ * Gets the Israeli Shekel symbol (₪)
  *
- * Provides a convenient shorthand for formatting values in the default
- * currency with Hebrew locale. All standard options except currency can
- * still be customized.
- *
- * @param amount - The number to format as ILS
- * @param options - Formatting options (excluding currency)
- * @returns Formatted ILS currency string
- *
- * @example
- * // Formats as ₪100.00
- * formatILS(100)
- */
-export function formatILS(
-  amount: number,
-  options: Omit<FormatCurrencyOptions, 'currency'> = {}
-): string {
-  return formatCurrency(amount, { ...options, currency: 'ILS' });
-}
-
-/**
- * Formats a number as US Dollar (USD)
- *
- * Provides a convenient shorthand for formatting values in USD
- * with English US locale. All standard options except currency can
- * still be customized.
- *
- * @param amount - The number to format as USD
- * @param options - Formatting options (excluding currency)
- * @returns Formatted USD currency string
- *
- * @example
- * // Formats as $100.00
- * formatUSD(100)
- */
-export function formatUSD(
-  amount: number,
-  options: Omit<FormatCurrencyOptions, 'currency'> = {}
-): string {
-  return formatCurrency(amount, { ...options, currency: 'USD', locale: 'en-US' });
-}
-
-/**
- * Formats a number as Euro (EUR)
- *
- * Provides a convenient shorthand for formatting values in EUR
- * with English US locale. All standard options except currency can
- * still be customized.
- *
- * @param amount - The number to format as EUR
- * @param options - Formatting options (excluding currency)
- * @returns Formatted EUR currency string
- *
- * @example
- * // Formats as €100.00
- * formatEUR(100)
- */
-export function formatEUR(
-  amount: number,
-  options: Omit<FormatCurrencyOptions, 'currency'> = {}
-): string {
-  return formatCurrency(amount, { ...options, currency: 'EUR', locale: 'en-US' });
-}
-
-/**
- * Gets the currency symbol for a given currency code
- *
- * Extracts just the currency symbol without any numeric value,
- * using locale-aware formatting. Falls back to hardcoded symbols
- * if the Intl API fails.
- *
- * @param currencyCode - The ISO currency code (default: 'ILS')
- * @returns The currency symbol (e.g. '₪', '$', '€')
+ * @returns The shekel symbol ₪
  *
  * @example
  * // Returns '₪'
- * getCurrencySymbol('ILS')
- *
- * @example
- * // Returns '$'
- * getCurrencySymbol('USD')
+ * getCurrencySymbol()
  */
-export function getCurrencySymbol(currencyCode: string = 'ILS'): string {
-  try {
-    return (0)
-      .toLocaleString('he-IL', {
-        style: 'currency',
-        currency: currencyCode,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })
-      .replace(/\d/g, '')
-      .trim();
-  } catch (error) {
-    // Fallback to common symbols
-    const symbols: { [key: string]: string } = {
-      ILS: '₪',
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-    };
-    return symbols[currencyCode] || currencyCode;
-  }
+export function getCurrencySymbol(): string {
+  return '₪';
+}
+
+/**
+ * Formats a number with the shekel symbol on the left side
+ *
+ * This helper function ensures consistent left-side shekel symbol placement.
+ *
+ * @param amount - The monetary amount to format
+ * @param options - Additional formatting options
+ * @returns Formatted string with ₪ symbol on the left side
+ */
+export function formatWithLeftSymbol(
+  amount: number,
+  options: Omit<FormatCurrencyOptions, 'displaySymbol'> = {}
+): string {
+  const formattedAmount = formatCurrency(amount, {
+    ...options,
+    displaySymbol: false,
+  });
+
+  return `₪${formattedAmount}`;
 }

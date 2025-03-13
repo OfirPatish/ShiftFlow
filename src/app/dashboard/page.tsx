@@ -8,9 +8,10 @@ import { showErrorToast, showInfoToast } from '@/lib/notificationToasts';
 import { FullPageSpinner } from '@/components/common/LoadingSpinner';
 import MonthSelector from '@/components/common/MonthSelector';
 import { useRouter } from 'next/navigation';
-
-// Import new dashboard components
-import StatsCard from '@/components/dashboard/StatsCard';
+// Import our extracted components
+import DashboardTutorial from '@/components/dashboard/DashboardTutorial';
+import QuickTips from '@/components/dashboard/QuickTips';
+import StatsGrid from '@/components/dashboard/StatsGrid';
 
 interface MonthlyStats {
   totalEarnings: number;
@@ -219,7 +220,7 @@ export default function Dashboard() {
 
   // After loading, show either empty state or dashboard content
   if (!shifts || shifts.length === 0) {
-    // Show empty state if no shifts
+    // Show empty state with tutorial if no shifts
     return (
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 py-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -234,67 +235,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="bg-gray-800/40 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/30 p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-semibold mb-2 text-gray-100">Welcome to ShiftFlow!</h2>
-            <p className="text-gray-400 text-sm">
-              You haven&apos;t tracked any shifts yet. Let&apos;s get you started with your shift
-              tracking journey.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gray-800/60 rounded-lg p-5 border border-gray-700/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full"></div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold mb-3">
-                1
-              </span>
-              <h3 className="text-lg font-medium text-white mb-2">Create an Employer</h3>
-              <p className="text-gray-400 text-sm">
-                Start by adding an employer. This will allow you to organize shifts by workplace.
-              </p>
-            </div>
-
-            <div className="bg-gray-800/60 rounded-lg p-5 border border-gray-700/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-bl-full"></div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold mb-3">
-                2
-              </span>
-              <h3 className="text-lg font-medium text-white mb-2">Set Up Pay Rates</h3>
-              <p className="text-gray-400 text-sm">
-                Configure your hourly rates, including overtime rates to accurately calculate
-                earnings.
-              </p>
-            </div>
-
-            <div className="bg-gray-800/60 rounded-lg p-5 border border-gray-700/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-bl-full"></div>
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500/20 text-green-400 font-bold mb-3">
-                3
-              </span>
-              <h3 className="text-lg font-medium text-white mb-2">Add Your Shifts</h3>
-              <p className="text-gray-400 text-sm">
-                Record your work shifts with start/end times. Your earnings will be calculated
-                automatically.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="/employers"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-            >
-              Add Employer
-            </a>
-            <a
-              href="/shifts"
-              className="inline-flex items-center px-4 py-2 border border-gray-700/50 text-sm font-medium rounded-md text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-            >
-              Add Shift
-            </a>
-          </div>
-        </div>
+        <DashboardTutorial />
       </div>
     );
   }
@@ -322,90 +263,11 @@ export default function Dashboard() {
         <div className="h-1 w-32 bg-gradient-to-r from-primary to-blue-500 rounded-full mb-6"></div>
       </div>
 
-      {/* Stats Cards in Center Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {/* Monthly Shifts Card */}
-        <div className="transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 h-full">
-          <StatsCard
-            title="Monthly Shifts"
-            value={monthlyStats.shiftsCount}
-            unit="shifts"
-            progressPercentage={Math.min(100, (monthlyStats.shiftsCount / 20) * 100)}
-            details={[
-              { label: 'Average per week', value: `${(monthlyStats.shiftsCount / 4).toFixed(1)}` },
-              { label: 'Last month', value: `${previousMonthStats.shiftsCount}` },
-            ]}
-          />
-        </div>
+      {/* Stats Cards Grid */}
+      <StatsGrid monthlyStats={monthlyStats} previousMonthStats={previousMonthStats} />
 
-        {/* Monthly Income Card */}
-        <div className="transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 h-full">
-          <StatsCard
-            title="Monthly Income"
-            value={`$${Math.round(monthlyStats.totalEarnings).toLocaleString()}`}
-            accentColor="green"
-            details={[
-              {
-                label: 'Regular',
-                value: `$${Math.round(
-                  monthlyStats.totalEarnings - (monthlyStats.overtimeEarnings || 0)
-                ).toLocaleString()}`,
-              },
-              {
-                label: 'Overtime',
-                value: `$${Math.round(monthlyStats.overtimeEarnings || 0).toLocaleString()}`,
-              },
-            ]}
-          />
-        </div>
-
-        {/* Work Hours Card */}
-        <div className="transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 h-full">
-          <StatsCard
-            title="Work Hours"
-            value={monthlyStats.totalHours.toFixed(1)}
-            unit="hours"
-            accentColor="blue"
-            details={[
-              { label: 'Regular', value: `${monthlyStats.regularHours.toFixed(1)}h` },
-              { label: 'Overtime', value: `${monthlyStats.overtimeHours.toFixed(1)}h` },
-            ]}
-          />
-        </div>
-      </div>
-
-      {/* Additional information or tips section */}
-      <div className="mt-10 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-lg p-6 max-w-6xl mx-auto hover:bg-gray-800/40 transition-all duration-300">
-        <div className="flex items-center mb-4">
-          <div className="bg-blue-500/20 p-2 rounded-full mr-3 animate-pulse">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-blue-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-100">Quick Tips</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p className="text-gray-400 text-sm">
-            Visit the <span className="text-primary">shifts page</span> to add or edit your work
-            shifts. Track your earnings and hours worked efficiently with ShiftFlow.
-          </p>
-          <p className="text-gray-400 text-sm">
-            Set up <span className="text-green-400">overtime rules</span> for each employer to
-            automatically calculate extra pay for hours worked beyond your regular schedule.
-          </p>
-        </div>
-      </div>
+      {/* Quick Tips Section */}
+      <QuickTips />
     </div>
   );
 }

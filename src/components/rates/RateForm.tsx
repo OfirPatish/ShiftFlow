@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form';
 import { useEmployers } from '@/hooks/useEmployers';
 import { Rate, RateFormData } from '@/hooks/useRates';
 import { format } from 'date-fns';
-import { Check, Trash2, Building2, Tag, Banknote, DollarSign } from 'lucide-react';
+import { Check, Trash2, Building2, Tag, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { getCurrencySymbol } from '@/lib/currencyFormatter';
 
 interface RateFormProps {
   rate?: Rate;
@@ -36,7 +37,7 @@ export default function RateForm({
       employerId: rate ? rate.employerId : employerId || '',
       name: rate?.name || '',
       baseRate: rate?.baseRate || 0,
-      currency: (rate?.currency as 'ILS' | 'USD' | 'EUR') || 'ILS',
+      currency: 'ILS', // Always use ILS
       effectiveDate: format(new Date(), 'yyyy-MM-dd'),
       isDefault: rate?.isDefault || false,
     },
@@ -44,14 +45,16 @@ export default function RateForm({
 
   // Watch form values for calculations
   const baseRate = watch('baseRate');
-  const currency = watch('currency');
+  const currency = 'ILS'; // Always use ILS
   const selectedEmployerId = watch('employerId');
+
+  // Get currency symbol
+  const currencySymbol = '₪'; // Always use ILS symbol
 
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('he-IL', {
-      style: 'currency',
-      currency: currency || 'ILS',
+      style: 'decimal',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -71,6 +74,7 @@ export default function RateForm({
     try {
       setIsLoading(true);
       data.effectiveDate = new Date();
+      data.currency = 'ILS'; // Ensure ILS is always used
       await onSubmit(data);
     } catch (error) {
       console.error('Error submitting rate:', error);
@@ -173,17 +177,17 @@ export default function RateForm({
         </div>
 
         {/* Rate fields in a grid for better layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Base hourly rate field */}
-          <div>
+        <div className="grid grid-cols-1 gap-5">
+          {/* Base hourly rate field - centered container */}
+          <div className="flex flex-col items-center">
             <label
               htmlFor="baseRate"
-              className="flex items-center text-sm font-medium text-gray-100 mb-1.5"
+              className="flex items-center justify-center text-sm font-medium text-gray-100 mb-1.5"
             >
               <DollarSign className="h-4 w-4 mr-1.5" />
-              Base Hourly Rate
+              Base Hourly Rate ({getCurrencySymbol()})
             </label>
-            <div className="relative">
+            <div className="relative w-full max-w-xs">
               <input
                 type="number"
                 id="baseRate"
@@ -199,53 +203,51 @@ export default function RateForm({
                 })}
                 className={`w-full bg-gray-800/80 border ${
                   errors.baseRate ? 'border-red-500' : 'border-gray-700'
-                } rounded-lg py-2.5 px-4 text-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-colors`}
+                } rounded-lg py-2.5 px-4 text-white text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-colors text-xl font-medium`}
               />
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-0">
+                <DollarSign className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
             {errors.baseRate && (
-              <p className="mt-1 text-sm text-red-500 flex items-center">
+              <p className="mt-1 text-sm text-red-500 flex items-center justify-center">
                 <span className="mr-1">•</span>
                 {errors.baseRate.message}
               </p>
             )}
           </div>
 
-          {/* Currency selector */}
-          <div>
-            <label
-              htmlFor="currency"
-              className="flex items-center text-sm font-medium text-gray-100 mb-1.5"
-            >
-              <Banknote className="h-4 w-4 mr-1.5" />
-              Currency
-            </label>
-            <select
-              id="currency"
-              {...register('currency')}
-              className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-white appearance-none"
-            >
-              <option value="ILS">₪ ILS</option>
-              <option value="USD">$ USD</option>
-              <option value="EUR">€ EUR</option>
-            </select>
-          </div>
+          {/* Hidden currency field (removed dropdown but keeping the field for form data) */}
+          <input type="hidden" {...register('currency')} value="ILS" />
         </div>
 
-        {/* Default rate toggle */}
+        {/* Default rate toggle - disabled if already default */}
         <div className="relative flex items-start">
           <div className="flex items-center h-5">
             <input
               id="isDefault"
               type="checkbox"
               {...register('isDefault')}
-              className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-600 rounded bg-gray-700"
+              disabled={rate?.isDefault}
+              className={`focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-600 rounded bg-gray-700 ${
+                rate?.isDefault ? 'opacity-80 cursor-not-allowed' : ''
+              }`}
             />
           </div>
           <div className="ml-3 text-sm">
-            <label htmlFor="isDefault" className="font-medium text-gray-300 cursor-pointer">
-              Set as default rate
+            <label
+              htmlFor="isDefault"
+              className={`font-medium text-gray-300 ${
+                rate?.isDefault ? 'cursor-default' : 'cursor-pointer'
+              }`}
+            >
+              {rate?.isDefault ? 'Default rate' : 'Set as default rate'}
             </label>
-            <p className="text-gray-500">This rate will be used by default for new shifts</p>
+            <p className="text-gray-500">
+              {rate?.isDefault
+                ? 'This is currently the default rate. Select another rate as default to change.'
+                : 'This rate will be used by default for new shifts'}
+            </p>
           </div>
         </div>
       </div>

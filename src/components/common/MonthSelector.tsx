@@ -47,18 +47,18 @@ export default function MonthSelector({
     <div className={`flex items-center ${className}`}>
       <button
         onClick={handlePreviousMonth}
-        className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700 text-gray-200 transition-colors"
+        className="h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700 text-gray-200 transition-colors touch-manipulation active:bg-gray-600"
         aria-label="Previous month"
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
 
-      <div className="flex flex-col items-center mx-2 min-w-[140px]">
-        <span className="text-gray-100 font-medium">{formattedMonth}</span>
+      <div className="flex flex-col items-center mx-3 sm:mx-2 min-w-[140px]">
+        <span className="text-gray-100 font-medium text-base sm:text-base">{formattedMonth}</span>
         {!isCurrentMonth && (
           <button
             onClick={handleCurrentMonth}
-            className="text-xs text-primary-400 hover:text-primary-300"
+            className="text-xs text-primary-400 hover:text-primary-300 py-1 touch-manipulation active:text-primary-500"
           >
             Back to current month
           </button>
@@ -67,7 +67,7 @@ export default function MonthSelector({
 
       <button
         onClick={handleNextMonth}
-        className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700 text-gray-200 transition-colors"
+        className="h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-full bg-gray-800/50 hover:bg-gray-700 text-gray-200 transition-colors touch-manipulation active:bg-gray-600"
         aria-label="Next month"
       >
         <ChevronRight className="h-5 w-5" />

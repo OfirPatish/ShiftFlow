@@ -114,16 +114,18 @@ export default function ShiftForm({
 
           // Only auto-select rate if creating a new shift and no rate is selected yet
           if (!shift && data.length > 0 && !watch('rateId')) {
-            // Check if user's default rate exists and belongs to this employer
-            const userDefaultRate = defaultRateId
-              ? data.find((rate: any) => rate._id === defaultRateId)
-              : null;
+            // Always prioritize the user's selected rate from settings
+            if (defaultRateId) {
+              const userSelectedRate = data.find((rate: any) => rate._id === defaultRateId);
+              if (userSelectedRate) {
+                setValue('rateId', userSelectedRate._id);
+                return;
+              }
+            }
 
-            // Find employer's default rate
+            // If no user selected rate, fallback to employer's default rate
             const employerDefaultRate = data.find((rate: any) => rate.isDefault);
-
-            // Set the most appropriate rate
-            setValue('rateId', userDefaultRate?._id || employerDefaultRate?._id || data[0]._id);
+            setValue('rateId', employerDefaultRate?._id || data[0]._id);
           }
         }
       } catch (error) {
