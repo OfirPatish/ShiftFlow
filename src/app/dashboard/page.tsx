@@ -121,17 +121,7 @@ export default function Dashboard() {
     };
 
     fetchPreviousMonthData();
-  }, [
-    fetchShifts,
-    selectedMonth,
-    monthlyStats.totalEarnings,
-    monthlyStats.totalHours,
-    monthlyStats.regularHours,
-    monthlyStats.overtimeHours,
-    monthlyStats.overtimeEarnings,
-    monthlyStats.shiftsCount,
-    shifts,
-  ]);
+  }, [fetchShifts, selectedMonth]);
 
   // Handle month change
   const handleMonthChange = (startDate: Date, endDate: Date, currentMonth: Date) => {
