@@ -20,12 +20,11 @@ export async function GET() {
     let settings = await UserSettings.findOne({ userId: session.user.id });
 
     if (!settings) {
-      settings = new UserSettings({
+      settings = await UserSettings.create({
         userId: session.user.id,
         defaultEmployerId: null,
         defaultRateId: null,
       });
-      await settings.save();
     }
 
     return NextResponse.json(settings);

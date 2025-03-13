@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, Document, model } from 'mongoose';
+import { getModel } from '@/lib/databaseConnection';
 
 /**
  * Interface representing a pay rate configuration for a specific employer
@@ -72,8 +73,8 @@ rateSchema.statics.findApplicableRate = async function (userId, employerId, date
   }).sort({ effectiveDate: -1 });
 };
 
-// More reliable model registration for serverless environments
-// This approach helps prevent "Schema hasn't been registered for model" errors
-const Rate = mongoose.models?.Rate || mongoose.model('Rate', rateSchema);
+// The most reliable way to register models in a serverless environment
+// Using our centralized getModel helper to prevent registration errors
+const Rate = getModel<IRate>('Rate', rateSchema);
 
 export default Rate;

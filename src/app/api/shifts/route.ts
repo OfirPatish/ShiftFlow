@@ -129,7 +129,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   );
 
   // Create new shift with basic fields and calculated values
-  const newShift = new Shift({
+  const newShift = await Shift.create({
     userId: session.user.id,
     employerId: data.employerId,
     rateId: data.rateId,
@@ -146,8 +146,6 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     overtimeEarnings2: earnings.overtimeEarnings2,
     totalEarnings: earnings.totalEarnings,
   });
-
-  await newShift.save();
 
   // Populate references before returning
   await newShift.populate('employerId', 'name color');

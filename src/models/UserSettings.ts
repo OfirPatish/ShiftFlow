@@ -1,5 +1,6 @@
 import mongoose, { Schema, models, model } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { getModel } from '@/lib/databaseConnection';
 
 /**
  * Interface representing user preferences and default settings
@@ -40,9 +41,8 @@ const userSettingsSchema = new Schema<IUserSettings>(
 // Create an index for faster lookups by user ID
 userSettingsSchema.index({ userId: 1 });
 
-// More reliable model registration for serverless environments
-// This approach helps prevent "Schema hasn't been registered for model" errors
-const UserSettings =
-  mongoose.models?.UserSettings || mongoose.model('UserSettings', userSettingsSchema);
+// The most reliable way to register models in a serverless environment
+// Using our centralized getModel helper to prevent registration errors
+const UserSettings = getModel<IUserSettings>('UserSettings', userSettingsSchema);
 
 export default UserSettings;

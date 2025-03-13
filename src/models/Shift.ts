@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, Document, model } from 'mongoose';
+import { getModel } from '@/lib/databaseConnection';
 
 /**
  * Interface representing a completed work shift
@@ -136,7 +137,8 @@ shiftSchema.statics.findUpcoming = async function (userId, limit = 5) {
     .populate('rateId', 'baseRate currency');
 };
 
-// This approach helps prevent "Schema hasn't been registered for model" errors
-const Shift = mongoose.models?.Shift || mongoose.model('Shift', shiftSchema);
+// The most reliable way to register models in a serverless environment
+// Using our centralized getModel helper to prevent registration errors
+const Shift = getModel<IShift>('Shift', shiftSchema);
 
 export default Shift;

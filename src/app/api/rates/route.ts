@@ -94,8 +94,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the new rate
-    const newRate = new Rate({
+    // Create the new rate using Rate.create instead of new Rate()
+    const newRate = await Rate.create({
       userId: session.user.id,
       employerId: data.employerId,
       name: data.name,
@@ -104,8 +104,6 @@ export async function POST(req: NextRequest) {
       effectiveDate: data.effectiveDate ? new Date(data.effectiveDate) : new Date(),
       isDefault,
     });
-
-    await newRate.save();
 
     return NextResponse.json(newRate, { status: 201 });
   } catch (error) {

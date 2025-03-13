@@ -89,3 +89,17 @@ export async function connectToDatabase() {
 
   return cached.conn;
 }
+
+/**
+ * Safely get a Mongoose model
+ *
+ * This helper function prevents the "Schema hasn't been registered for model" error
+ * by ensuring a model is only registered once, regardless of how many times it's requested.
+ *
+ * @param modelName The name of the model to get
+ * @param schema The schema to use if the model doesn't exist
+ * @returns The Mongoose model
+ */
+export function getModel<T>(modelName: string, schema: mongoose.Schema<T>) {
+  return mongoose.models[modelName] || mongoose.model<T>(modelName, schema);
+}

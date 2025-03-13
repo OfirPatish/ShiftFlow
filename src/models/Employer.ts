@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, Document, model } from 'mongoose';
+import { getModel } from '@/lib/databaseConnection';
 
 /**
  * Interface representing an employer entity in the system
@@ -55,8 +56,8 @@ employerSchema.statics.findActiveForUser = async function (userId) {
   return this.find({ userId, isActive: true }).sort({ name: 1 });
 };
 
-// More reliable model registration for serverless environments
-// This approach helps prevent "Schema hasn't been registered for model" errors
-const Employer = mongoose.models?.Employer || mongoose.model('Employer', employerSchema);
+// The most reliable way to register models in a serverless environment
+// Using our centralized getModel helper to prevent registration errors
+const Employer = getModel<IEmployer>('Employer', employerSchema);
 
 export default Employer;

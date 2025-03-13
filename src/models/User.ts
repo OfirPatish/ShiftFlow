@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, model } from 'mongoose';
+import { getModel } from '@/lib/databaseConnection';
 
 /**
  * Interface representing a user account in the system
@@ -49,8 +50,8 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// More reliable model registration for serverless environments
-// This approach helps prevent "Schema hasn't been registered for model" errors
-const User = mongoose.models?.User || mongoose.model('User', userSchema);
+// The most reliable way to register models in a serverless environment
+// Using our centralized getModel helper to prevent registration errors
+const User = getModel<IUser>('User', userSchema);
 
 export default User;

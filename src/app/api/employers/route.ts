@@ -45,14 +45,14 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    const newEmployer = new Employer({
+    // Create a new employer using the create method instead of direct instantiation
+    // This avoids potential issues with model registration in serverless environments
+    const newEmployer = await Employer.create({
       userId: session.user.id,
       name: data.name,
       location: data.location || '',
       color: data.color || '#3B82F6', // Default blue color
     });
-
-    await newEmployer.save();
 
     return NextResponse.json(newEmployer, { status: 201 });
   } catch (error) {
