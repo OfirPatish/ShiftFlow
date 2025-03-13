@@ -36,11 +36,6 @@ const BottomNav = () => {
       icon: CurrencyDollarIcon,
     },
     {
-      name: 'Reports',
-      href: '/reports',
-      icon: ChartBarIcon,
-    },
-    {
       name: 'Settings',
       href: '/settings',
       icon: Cog6ToothIcon,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/databaseConnection';
+import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
 import Shift from '@/models/Shift';
 import { authOptions } from '@/lib/authConfig';
 import mongoose from 'mongoose';
@@ -18,6 +18,8 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
   try {
     await connectToDatabase();
+    // Preload all models to ensure they're properly registered
+    await preloadModels();
   } catch (dbError) {
     return errorResponse('Database connection failed. Please try again later.', 500, null, true);
   }
@@ -110,6 +112,8 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   try {
     await connectToDatabase();
+    // Preload all models to ensure they're properly registered
+    await preloadModels();
   } catch (dbError) {
     return errorResponse('Database connection failed. Please try again later.', 500, null, true);
   }

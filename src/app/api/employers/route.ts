@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/databaseConnection';
+import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
 import Employer from '@/models/Employer';
 import { authOptions } from '@/lib/authConfig';
 
@@ -14,6 +14,8 @@ export async function GET() {
     }
 
     await connectToDatabase();
+    // Preload all models to ensure they're properly registered
+    await preloadModels();
 
     // Use the mongoose find method directly since the static method may not be typed correctly
     const employers = await Employer.find({
@@ -44,6 +46,8 @@ export async function POST(req: NextRequest) {
     }
 
     await connectToDatabase();
+    // Preload all models to ensure they're properly registered
+    await preloadModels();
 
     // Create a new employer using the create method instead of direct instantiation
     // This avoids potential issues with model registration in serverless environments

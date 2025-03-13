@@ -101,5 +101,31 @@ export async function connectToDatabase() {
  * @returns The Mongoose model
  */
 export function getModel<T>(modelName: string, schema: mongoose.Schema<T>) {
-  return mongoose.models[modelName] || mongoose.model<T>(modelName, schema);
+  // Check if the model already exists to avoid re-compilation
+  if (mongoose.models[modelName]) {
+    return mongoose.models[modelName] as mongoose.Model<T>;
+  }
+
+  // If the model doesn't exist, create and register it
+  return mongoose.model<T>(modelName, schema);
+}
+
+/**
+ * This function ensures all related schemas are properly registered
+ * before they're referenced in queries with populate()
+ */
+export async function preloadModels() {
+  // Import all models that might be referenced in populate() calls
+  try {
+    // Import models directly to ensure they're registered
+    await import('@/models/User');
+    await import('@/models/Employer');
+    await import('@/models/Rate');
+    await import('@/models/Shift');
+    await import('@/models/UserSettings');
+
+    console.log('All models preloaded successfully');
+  } catch (error) {
+    console.error('Error preloading models:', error);
+  }
 }

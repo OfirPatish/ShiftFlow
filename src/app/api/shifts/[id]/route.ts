@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/databaseConnection';
+import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
 import Shift from '@/models/Shift';
 import { authOptions } from '@/lib/authConfig';
 import mongoose from 'mongoose';
@@ -22,6 +22,8 @@ async function getAuthorizedShift(req: NextRequest, params: { id: string }) {
     }
 
     await connectToDatabase();
+    // Preload all models to ensure they're properly registered
+    await preloadModels();
 
     const shift = await Shift.findById(params.id);
 
