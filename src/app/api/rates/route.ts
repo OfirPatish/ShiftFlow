@@ -71,6 +71,18 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   await connectToDatabase();
 
+  // Check if a rate with the same name already exists for this user and employer
+  const escapedName = data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+  const existingRate = await Rate.findOne({
+    userId: session.user.id,
+    employerId: data.employerId,
+    name: { $regex: new RegExp(`^${escapedName}$`, 'i') }, // Case-insensitive match
+  });
+
+  if (existingRate) {
+    return errorResponse('A rate with this name already exists for this employer', 400);
+  }
+
   // Check if this is the first rate for this employer, and if so, make it default
   const existingRates = await Rate.countDocuments({
     userId: session.user.id,

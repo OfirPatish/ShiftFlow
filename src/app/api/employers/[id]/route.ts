@@ -63,6 +63,24 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const data = await req.json();
     const { employer } = result;
 
+    // Check for duplicate name if name is being updated
+    if (data.name && data.name !== employer.name) {
+      const escapedName = data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+      const duplicateEmployer = await Employer.findOne({
+        userId: employer.userId,
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }, // Case-insensitive match
+        isActive: true,
+        _id: { $ne: employer._id }, // Exclude current employer
+      });
+
+      if (duplicateEmployer) {
+        return NextResponse.json(
+          { error: 'An employer with this name already exists' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Update allowed fields
     if (data.name) employer.name = data.name;
     if (data.location !== undefined) employer.location = data.location;

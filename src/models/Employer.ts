@@ -48,6 +48,9 @@ const employerSchema = new Schema<IEmployer>(
 // Create an index for faster lookups
 employerSchema.index({ userId: 1 });
 
+// Add compound unique index for userId and name
+employerSchema.index({ userId: 1, name: 1 }, { unique: true });
+
 /**
  * Custom static method to find all active employers for a user
  * Returns employers sorted alphabetically by name

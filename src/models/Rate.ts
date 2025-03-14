@@ -61,6 +61,9 @@ const rateSchema = new Schema<IRate>(
 // Create an index for faster lookups by user and employer
 rateSchema.index({ userId: 1, employerId: 1, effectiveDate: -1 });
 
+// Add compound unique index for userId, employerId, and name to prevent duplicates
+rateSchema.index({ userId: 1, employerId: 1, name: 1 }, { unique: true });
+
 /**
  * Finds the applicable rate for a user and employer at a specific date
  * Returns the most recent rate that is effective on or before the provided date

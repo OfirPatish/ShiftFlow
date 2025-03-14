@@ -76,6 +76,9 @@ export default function Employers() {
     } finally {
       setIsDeleteConfirmOpen(false);
       setEmployerToDelete(null);
+      // Close the form modal as well
+      setIsFormModalOpen(false);
+      setCurrentEmployer(null);
     }
   };
 

@@ -91,6 +91,9 @@ export default function Rates() {
         showSuccessToast('Rate deleted successfully');
         setIsDeleteConfirmOpen(false);
         setRateToDelete(null);
+        // Close the rate modal as well
+        setIsModalOpen(false);
+        setCurrentRate(undefined);
       } catch (error: any) {
         console.error('Error deleting rate:', error);
         showErrorToast(error.message || 'Error deleting rate');

@@ -49,6 +49,21 @@ export async function POST(req: NextRequest) {
     // Preload all models to ensure they're properly registered
     await preloadModels();
 
+    // Check if an employer with the same name already exists for this user
+    const escapedName = data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+    const existingEmployer = await Employer.findOne({
+      userId: session.user.id,
+      name: { $regex: new RegExp(`^${escapedName}$`, 'i') }, // Case-insensitive match
+      isActive: true,
+    });
+
+    if (existingEmployer) {
+      return NextResponse.json(
+        { error: 'An employer with this name already exists' },
+        { status: 400 }
+      );
+    }
+
     // Create a new employer using the create method instead of direct instantiation
     // This avoids potential issues with model registration in serverless environments
     const newEmployer = await Employer.create({

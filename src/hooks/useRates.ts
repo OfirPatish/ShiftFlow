@@ -106,6 +106,10 @@ export function useRates(employerId?: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Check if this is a duplicate rate error
+        if (response.status === 400 && errorData.error?.includes('already exists')) {
+          throw new Error(`${errorData.error}. Please use a different name.`);
+        }
         throw new Error(errorData.error || 'Failed to create rate');
       }
 
@@ -171,6 +175,10 @@ export function useRates(employerId?: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Check if this is a duplicate rate error
+        if (response.status === 400 && errorData.error?.includes('already exists')) {
+          throw new Error(`${errorData.error}. Please use a different name.`);
+        }
         throw new Error(errorData.error || 'Failed to update rate');
       }
 

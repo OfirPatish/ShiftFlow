@@ -66,6 +66,21 @@ export const PATCH = withErrorHandling(
 
     const { rate } = result;
 
+    // Check for duplicate name if name is being updated
+    if (data.name && data.name !== rate.name) {
+      const escapedName = data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+      const duplicateRate = await Rate.findOne({
+        userId: result.session.user.id,
+        employerId: rate.employerId,
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }, // Case-insensitive match
+        _id: { $ne: rate._id }, // Exclude current rate
+      });
+
+      if (duplicateRate) {
+        return errorResponse('A rate with this name already exists for this employer', 400);
+      }
+    }
+
     // Update allowed fields
     if (data.name) rate.name = data.name;
 
