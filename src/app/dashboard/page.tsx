@@ -28,7 +28,8 @@ export default function Dashboard() {
     totalEarnings: 0,
     regularHours: 0,
     overtimeHours: 0,
-    overtimeEarnings: 0,
+    overtimeEarnings1: 0,
+    overtimeEarnings2: 0,
     shiftsCount: 0,
   });
 
@@ -37,7 +38,8 @@ export default function Dashboard() {
     totalEarnings: 0,
     regularHours: 0,
     overtimeHours: 0,
-    overtimeEarnings: 0,
+    overtimeEarnings1: 0,
+    overtimeEarnings2: 0,
     shiftsCount: 0,
   });
 

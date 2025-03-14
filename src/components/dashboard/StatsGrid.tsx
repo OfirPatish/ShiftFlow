@@ -53,13 +53,14 @@ export default function StatsGrid({ monthlyStats, previousMonthStats }: StatsGri
             {
               label: 'Regular',
               value: `${getCurrencySymbol()}${Math.round(
-                monthlyStats.totalEarnings - (monthlyStats.overtimeEarnings || 0)
+                monthlyStats.totalEarnings -
+                  ((monthlyStats.overtimeEarnings1 || 0) + (monthlyStats.overtimeEarnings2 || 0))
               ).toLocaleString()}`,
             },
             {
               label: 'Overtime',
               value: `${getCurrencySymbol()}${Math.round(
-                monthlyStats.overtimeEarnings || 0
+                (monthlyStats.overtimeEarnings1 || 0) + (monthlyStats.overtimeEarnings2 || 0)
               ).toLocaleString()}`,
             },
           ]}

@@ -3,6 +3,7 @@ export interface MonthlyStats {
   totalHours: number;
   regularHours: number;
   overtimeHours: number;
-  overtimeEarnings?: number;
+  overtimeEarnings1: number;
+  overtimeEarnings2: number;
   shiftsCount: number;
 }

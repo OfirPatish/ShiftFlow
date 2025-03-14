@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ChevronDown, ChevronUp, LightbulbIcon } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { MonthlyStats } from '@/types/dashboard';
 
 interface QuickTipsProps {
@@ -68,28 +68,23 @@ export default function QuickTips({ monthlyStats }: QuickTipsProps) {
   return (
     <div className="mt-8 bg-gray-800/20 backdrop-blur-sm border border-gray-700/20 rounded-lg p-5 max-w-6xl mx-auto hover:bg-gray-800/30 transition-all duration-300">
       <div
-        className="flex items-center justify-between cursor-pointer"
+        className="flex items-center justify-between cursor-pointer pb-2 border-b border-gray-700/20"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center">
-          <div className="bg-blue-500/10 p-1.5 rounded-full mr-2">
-            <LightbulbIcon className="h-4 w-4 text-blue-400" />
-          </div>
-          <h3 className="text-base font-medium text-gray-100">Insights</h3>
-        </div>
+        <h3 className="text-base font-medium text-gray-100">Insights</h3>
         <button className="text-gray-400 hover:text-white">
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       </div>
 
       {!isExpanded && (
-        <p className="text-gray-400 text-xs mt-2 pl-7">
+        <p className="text-gray-400 text-xs mt-3">
           {insights[0].tip} <span className="text-blue-400">(click to view more)</span>
         </p>
       )}
 
       {isExpanded && (
-        <div className="mt-3 space-y-3 pl-7">
+        <div className="mt-3 space-y-3">
           {insights.map((insight) => (
             <div
               key={insight.id}

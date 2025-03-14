@@ -111,6 +111,9 @@ export function calculateMonthlyTotals(shifts: ShiftCalculationResult[]): {
   totalEarnings: number;
   regularHours: number;
   overtimeHours: number;
+  overtimeEarnings1: number;
+  overtimeEarnings2: number;
+  shiftsCount: number;
 } {
   return shifts.reduce(
     (acc, shift) => {
@@ -119,9 +122,20 @@ export function calculateMonthlyTotals(shifts: ShiftCalculationResult[]): {
         totalEarnings: acc.totalEarnings + shift.totalEarnings,
         regularHours: acc.regularHours + shift.regularHours,
         overtimeHours: acc.overtimeHours + shift.overtimeHours1 + shift.overtimeHours2,
+        overtimeEarnings1: acc.overtimeEarnings1 + shift.overtimeEarnings1,
+        overtimeEarnings2: acc.overtimeEarnings2 + shift.overtimeEarnings2,
+        shiftsCount: acc.shiftsCount + 1,
       };
     },
-    { totalHours: 0, totalEarnings: 0, regularHours: 0, overtimeHours: 0 }
+    {
+      totalHours: 0,
+      totalEarnings: 0,
+      regularHours: 0,
+      overtimeHours: 0,
+      overtimeEarnings1: 0,
+      overtimeEarnings2: 0,
+      shiftsCount: 0,
+    }
   );
 }
 
