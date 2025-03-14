@@ -81,7 +81,6 @@ export default function ShiftForm({
             ? shift.rateId._id
             : (shift.rateId as string)
           : defaultRateId || '',
-      breakDuration: shift?.breakDuration || 0,
       notes: shift?.notes || '',
     },
   });

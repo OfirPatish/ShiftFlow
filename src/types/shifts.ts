@@ -36,7 +36,6 @@ export interface ShiftFormData {
   rateId: string;
   startTime: string | Date;
   endTime: string | Date;
-  breakDuration?: number;
   notes?: string;
 }
 

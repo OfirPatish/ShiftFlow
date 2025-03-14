@@ -47,27 +47,31 @@ export const validateDateTimeInputs = (
 
   // Validate start time is before end time
   if (startTime && endTime) {
-    const [startHour, startMinute] = startTime.split(':').map((num) => parseInt(num, 10));
-    const [endHour, endMinute] = endTime.split(':').map((num) => parseInt(num, 10));
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
+    // Ensure we're working with strings
+    const startTimeStr = String(startTime);
+    const endTimeStr = String(endTime);
+
+    const [startHour, startMinute] = startTimeStr.split(':').map((num) => parseInt(num, 10));
+    const [endHour, endMinute] = endTimeStr.split(':').map((num) => parseInt(num, 10));
+
+    // Calculate minutes since start of day for both times
+    let startTotalMinutes = startHour * 60 + startMinute;
+    let endTotalMinutes = endHour * 60 + endMinute;
+
+    // If end time is earlier than start time, assume it's the next day
+    if (endTotalMinutes < startTotalMinutes) {
+      endTotalMinutes += 24 * 60; // Add 24 hours worth of minutes
+    }
 
     // Check if the end time is exactly the same as start time
-    if (startTotalMinutes === endTotalMinutes) {
+    if (endTotalMinutes === startTotalMinutes) {
       setError('endTime', { message: 'End time must be different from start time' });
       return false;
     }
 
-    // Verify end time is after start time
-    if (endTotalMinutes <= startTotalMinutes) {
-      setError('endTime', {
-        message: 'End time must be after start time',
-      });
-      return false;
-    }
-
     // Check if the shift is very short (less than 15 minutes)
-    if (Math.abs(endTotalMinutes - startTotalMinutes) < 15) {
+    const shiftDurationMinutes = endTotalMinutes - startTotalMinutes;
+    if (shiftDurationMinutes < 15) {
       setError('endTime', {
         message: 'Shift is less than 15 minutes. Please verify the times.',
       });
@@ -81,7 +85,22 @@ export const validateDateTimeInputs = (
 // Combine date and time into a single datetime string
 export const combineDateTime = (date: string, time: string): string => {
   if (!date || !time) return '';
-  return `${date}T${time}`;
+
+  // Ensure we're working with strings
+  const timeStr = String(time);
+  const dateStr = String(date);
+
+  // Parse the time components
+  const [hours, minutes] = timeStr.split(':').map((num) => parseInt(num, 10));
+
+  // Create a new date from the date string
+  const baseDate = new Date(dateStr);
+
+  // Set the time components
+  baseDate.setHours(hours, minutes, 0, 0);
+
+  // Return the ISO string
+  return baseDate.toISOString();
 };
 
 // Process form data for submission

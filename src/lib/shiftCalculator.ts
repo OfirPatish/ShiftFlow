@@ -64,26 +64,42 @@ export function calculateShiftEarnings(
     throw new Error('End time must be after start time');
   }
 
-  // Calculate total work minutes (excluding break)
-  const totalMinutes = (endTime.getTime() - startTime.getTime()) / 60000 - breakDuration;
+  // Calculate total shift duration in minutes
+  const shiftDurationMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
 
-  // Handle negative duration after break (shouldn't happen, but just in case)
-  if (totalMinutes < 0) {
-    throw new Error('Break duration exceeds shift duration');
+  // Validate break duration
+  if (breakDuration < 0) {
+    throw new Error('Break duration cannot be negative');
   }
 
-  // Convert minutes to hours
-  const totalHours = totalMinutes / 60;
+  if (breakDuration >= shiftDurationMinutes) {
+    throw new Error('Break duration cannot be longer than the shift duration');
+  }
 
-  // Calculate hours in each rate tier
-  const regularHours = Math.min(8, totalHours);
-  const overtimeHours1 = Math.max(0, Math.min(2, totalHours - 8)); // Hours between 8-10
-  const overtimeHours2 = Math.max(0, totalHours - 10); // Hours beyond 10
+  // Calculate total work minutes (excluding break) with proper rounding
+  const totalMinutes = Math.round(shiftDurationMinutes - breakDuration);
 
-  // Calculate earnings for each tier
-  const regularEarnings = regularHours * baseRate;
-  const overtimeEarnings1 = overtimeHours1 * (baseRate * OVERTIME_RATE_1_MULTIPLIER);
-  const overtimeEarnings2 = overtimeHours2 * (baseRate * OVERTIME_RATE_2_MULTIPLIER);
+  // Convert minutes to hours with fixed precision (2 decimal places)
+  const totalHours = Number((totalMinutes / 60).toFixed(2));
+
+  // Calculate hours in each rate tier with fixed precision
+  const regularHours = Number(Math.min(8, totalHours).toFixed(2));
+  const overtimeHours1 = Number(Math.max(0, Math.min(2, totalHours - 8)).toFixed(2)); // Hours between 8-10
+  const overtimeHours2 = Number(Math.max(0, totalHours - 10).toFixed(2)); // Hours beyond 10
+
+  // Calculate earnings for each tier with fixed precision
+  const regularEarnings = Number((regularHours * baseRate).toFixed(2));
+  const overtimeEarnings1 = Number(
+    (overtimeHours1 * (baseRate * OVERTIME_RATE_1_MULTIPLIER)).toFixed(2)
+  );
+  const overtimeEarnings2 = Number(
+    (overtimeHours2 * (baseRate * OVERTIME_RATE_2_MULTIPLIER)).toFixed(2)
+  );
+
+  // Calculate total earnings with fixed precision
+  const totalEarnings = Number(
+    (regularEarnings + overtimeEarnings1 + overtimeEarnings2).toFixed(2)
+  );
 
   return {
     regularHours,
@@ -93,7 +109,7 @@ export function calculateShiftEarnings(
     regularEarnings,
     overtimeEarnings1,
     overtimeEarnings2,
-    totalEarnings: regularEarnings + overtimeEarnings1 + overtimeEarnings2,
+    totalEarnings,
   };
 }
 
