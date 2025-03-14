@@ -106,14 +106,19 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     return errorResponse('Invalid date format for startTime or endTime', 400);
   }
 
-  // For overnight shifts, end time can be before start time in terms of hours,
-  // but the actual date objects should have end time on the next day,
-  // which means end time will be after start time
+  // Ensure that end time is after start time (even for overnight shifts, the actual date objects
+  // should have correct date values)
   if (endTime <= startTime) {
     return errorResponse(
       'End time must be after start time. For overnight shifts, make sure the end date is set to the next day.',
       400
     );
+  }
+
+  // Check if the shift is very short (less than 15 minutes)
+  const diffMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+  if (diffMinutes < 15) {
+    return errorResponse('Shift duration must be at least 15 minutes', 400);
   }
 
   try {
@@ -122,6 +127,38 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     await preloadModels();
   } catch (dbError) {
     return errorResponse('Database connection failed. Please try again later.', 500, null, true);
+  }
+
+  // Get the start date (without time) to check for shifts on the same day
+  const startDate = new Date(startTime);
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(startDate);
+  endDate.setHours(23, 59, 59, 999);
+
+  // Check for any shifts on the same day - if editing, exclude the current shift
+  const existingShiftQuery: any = {
+    userId: session.user.id,
+    startTime: { $gte: startDate, $lt: endDate },
+  };
+
+  // If we're updating (PATCH) and have a shift ID, exclude that shift from the check
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+  const isUpdating = pathSegments.length > 2;
+  const shiftId = isUpdating ? pathSegments[pathSegments.length - 1] : null;
+
+  if (isUpdating && shiftId) {
+    existingShiftQuery._id = { $ne: shiftId };
+  }
+
+  const existingShift = await Shift.findOne(existingShiftQuery);
+
+  if (existingShift) {
+    return errorResponse(
+      'You already have a shift on this day. Only one shift per day is allowed.',
+      400
+    );
   }
 
   // Fetch the rate to get the base rate details

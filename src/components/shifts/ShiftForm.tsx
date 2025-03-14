@@ -163,6 +163,13 @@ export default function ShiftForm({
       setApiError(null);
       setIsSubmitting(true);
 
+      // First check if there's already a dateError (which would include warnings set by ShiftFormDateTime)
+      // This prevents the form from submitting when there's already a warning about an existing shift
+      if (dateError) {
+        setIsSubmitting(false);
+        return;
+      }
+
       // Validate inputs using the extracted utility
       const isValid = validateDateTimeInputs(
         startDate,
@@ -171,7 +178,8 @@ export default function ShiftForm({
         isOvernightShift,
         setError,
         clearErrors,
-        setDateError
+        setDateError,
+        null // We don't need to pass dateWarning here, as it's already set by the ShiftFormDateTime component
       );
 
       if (!isValid) {
@@ -188,9 +196,28 @@ export default function ShiftForm({
         isOvernightShift
       );
 
+      // No need to check for existing shifts here - we already do that in the DatePickerWheel
+      // The server will also validate and prevent duplicate shifts on the same day
+
       await onSubmit(processedData);
     } catch (error: any) {
-      setApiError(error.message || 'An error occurred');
+      // Display server-side errors as form errors instead of toast
+      // Check for specific error messages that we can map to form fields
+      const errorMessage = error.message || 'An error occurred';
+
+      if (errorMessage.includes('on this day') || errorMessage.includes('shift on the same day')) {
+        // Date-related error
+        setDateError(errorMessage);
+      } else if (errorMessage.includes('end time') || errorMessage.includes('End time')) {
+        // End time related error
+        setError('endTime', { message: errorMessage });
+      } else if (errorMessage.includes('start time') || errorMessage.includes('Start time')) {
+        // Start time related error
+        setError('startTime', { message: errorMessage });
+      } else {
+        // General API error that isn't field-specific
+        setApiError(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -199,7 +226,11 @@ export default function ShiftForm({
   return (
     <form onSubmit={onFormSubmit} className="space-y-6">
       {/* Display API errors if any */}
-      <ErrorMessage message={apiError} />
+      {apiError && (
+        <div className="p-3 text-center">
+          <p className="text-red-600 font-medium">{apiError}</p>
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* Hidden employer and rate fields */}
@@ -220,6 +251,7 @@ export default function ShiftForm({
           setDateError={setDateError}
           errors={errors}
           clearErrors={clearErrors}
+          isEditMode={!!shift}
         />
 
         {/* Notes */}
