@@ -71,14 +71,16 @@ export default function Employers() {
     try {
       await deleteEmployer(employerToDelete);
       showSuccessToast('Employer deleted successfully');
-    } catch (error: any) {
-      showErrorToast(error.message || 'Failed to delete employer');
-    } finally {
       setIsDeleteConfirmOpen(false);
       setEmployerToDelete(null);
-      // Close the form modal as well
+      // Close the form modal
       setIsFormModalOpen(false);
-      setCurrentEmployer(null);
+      // Add delay for state reset to prevent UI glitches
+      setTimeout(() => {
+        setCurrentEmployer(null);
+      }, 300);
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to delete employer');
     }
   };
 
@@ -93,7 +95,12 @@ export default function Employers() {
         await createEmployer(formData);
         showSuccessToast('Employer created successfully');
       }
+      // First close the modal
       setIsFormModalOpen(false);
+      // Then reset current employer with a delay to prevent UI glitches
+      setTimeout(() => {
+        setCurrentEmployer(null);
+      }, 300);
     } catch (error: any) {
       showErrorToast(error.message || 'Failed to save employer');
     } finally {
@@ -106,7 +113,10 @@ export default function Employers() {
     // Only close the form modal if the delete confirmation dialog is not open
     if (!isDeleteConfirmOpen) {
       setIsFormModalOpen(false);
-      setCurrentEmployer(null);
+      // Add delay for state reset to prevent UI glitches
+      setTimeout(() => {
+        setCurrentEmployer(null);
+      }, 300);
     }
   };
 

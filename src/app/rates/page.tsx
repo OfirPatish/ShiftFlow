@@ -70,7 +70,12 @@ export default function Rates() {
         await createRate(data);
         showSuccessToast(`Rate "${data.name}" created successfully`);
       }
+      // First close the modal
       setIsModalOpen(false);
+      // Then reset current rate with a delay to prevent UI glitches
+      setTimeout(() => {
+        setCurrentRate(undefined);
+      }, 300);
     } catch (error: any) {
       console.error('Error submitting rate:', error);
       showErrorToast(error.message || 'Failed to save rate');
@@ -91,9 +96,12 @@ export default function Rates() {
         showSuccessToast('Rate deleted successfully');
         setIsDeleteConfirmOpen(false);
         setRateToDelete(null);
-        // Close the rate modal as well
+        // Close the rate modal
         setIsModalOpen(false);
-        setCurrentRate(undefined);
+        // Add delay for state reset to prevent UI glitches
+        setTimeout(() => {
+          setCurrentRate(undefined);
+        }, 300);
       } catch (error: any) {
         console.error('Error deleting rate:', error);
         showErrorToast(error.message || 'Error deleting rate');
@@ -106,7 +114,10 @@ export default function Rates() {
     // Only close the modal if the delete confirmation dialog is not open
     if (!isDeleteConfirmOpen) {
       setIsModalOpen(false);
-      setCurrentRate(undefined);
+      // Add delay for state reset to prevent UI glitches
+      setTimeout(() => {
+        setCurrentRate(undefined);
+      }, 300);
     }
   };
 
