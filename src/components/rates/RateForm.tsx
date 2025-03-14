@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useEmployers } from '@/hooks/useEmployers';
 import { Rate, RateFormData } from '@/hooks/useRates';
 import { format } from 'date-fns';
-import { Check, Trash2, Building2, Tag, DollarSign } from 'lucide-react';
+import { Check, Trash2, Building2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { getCurrencySymbol } from '@/lib/currencyFormatter';
@@ -184,7 +184,6 @@ export default function RateForm({
               htmlFor="baseRate"
               className="flex items-center justify-center text-sm font-medium text-gray-100 mb-1.5"
             >
-              <DollarSign className="h-4 w-4 mr-1.5" />
               Base Hourly Rate ({getCurrencySymbol()})
             </label>
             <div className="relative w-full max-w-xs">
@@ -205,16 +204,13 @@ export default function RateForm({
                   errors.baseRate ? 'border-red-500' : 'border-gray-700'
                 } rounded-lg py-2.5 px-4 text-white text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-colors text-xl font-medium`}
               />
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-0">
-                <DollarSign className="h-5 w-5 text-gray-400" />
-              </div>
+              {errors.baseRate && (
+                <p className="mt-1 text-sm text-red-500 flex items-center justify-center">
+                  <span className="mr-1">•</span>
+                  {errors.baseRate.message}
+                </p>
+              )}
             </div>
-            {errors.baseRate && (
-              <p className="mt-1 text-sm text-red-500 flex items-center justify-center">
-                <span className="mr-1">•</span>
-                {errors.baseRate.message}
-              </p>
-            )}
           </div>
 
           {/* Hidden currency field (removed dropdown but keeping the field for form data) */}
