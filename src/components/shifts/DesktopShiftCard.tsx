@@ -22,7 +22,12 @@ export function DesktopShiftCard({
   hasOvertime,
 }: DesktopShiftCardProps) {
   return (
-    <div className="relative bg-gray-800/40 backdrop-blur-sm border border-gray-700/40 rounded-xl shadow-md overflow-hidden hover:bg-gray-700/30 active:bg-gray-700/50 transition-colors">
+    <div
+      className={`relative bg-gray-800/40 backdrop-blur-sm border border-gray-700/40 rounded-xl shadow-md overflow-hidden hover:bg-gray-700/30 active:bg-gray-700/50 transition-colors ${
+        hasOvertime ? 'border-l-4' : ''
+      }`}
+      style={hasOvertime ? { borderLeftColor: '#FBBF24' } : undefined}
+    >
       <div
         className="grid grid-cols-12 gap-2 items-center px-6 py-4 cursor-pointer"
         onClick={() => onClick(shift)}
@@ -50,15 +55,10 @@ export function DesktopShiftCard({
             {shift.totalHours.toFixed(1)}
             <span className="text-sm text-gray-400 ml-1">hrs</span>
           </div>
-          {hasOvertime && (
-            <span className="ml-2 px-1.5 py-0.5 text-xs rounded bg-yellow-900/30 text-yellow-400 border border-yellow-800/30">
-              OT
-            </span>
-          )}
         </div>
 
         {/* Earnings Section - Right */}
-        <div className="col-span-3 flex items-center">
+        <div className="col-span-3">
           <span className="text-xl font-medium text-primary-400">
             {getCurrencySymbol()}
             {earningsAmount}

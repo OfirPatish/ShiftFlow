@@ -21,7 +21,10 @@ export function MobileShiftCard({
 }: MobileShiftCardProps) {
   return (
     <div
-      className="relative bg-gray-800/40 backdrop-blur-sm border border-gray-700/40 rounded-xl shadow-md overflow-hidden hover:bg-gray-700/30 active:bg-gray-700/50 transition-colors cursor-pointer"
+      className={`relative bg-gray-800/40 backdrop-blur-sm border border-gray-700/40 rounded-xl shadow-md overflow-hidden hover:bg-gray-700/30 active:bg-gray-700/50 transition-colors cursor-pointer ${
+        hasOvertime ? 'border-l-4' : ''
+      }`}
+      style={hasOvertime ? { borderLeftColor: '#FBBF24' } : undefined}
       onClick={() => onClick(shift)}
     >
       <div className="px-4 py-3 flex items-center">
@@ -36,11 +39,6 @@ export function MobileShiftCard({
               <span className="text-base font-medium text-gray-100 mr-1.5">
                 {shift.totalHours.toFixed(1)}
               </span>
-              {hasOvertime && (
-                <span className="px-1 py-0.5 text-xs rounded-sm bg-yellow-900/30 text-yellow-400 border border-yellow-800/30">
-                  OT
-                </span>
-              )}
             </div>
           </div>
 

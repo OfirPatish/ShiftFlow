@@ -1,22 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { showErrorToast } from '@/lib/notificationToasts';
-
-export interface Employer {
-  _id: string;
-  name: string;
-  location?: string;
-  color: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface EmployerFormData {
-  name: string;
-  location?: string;
-  color?: string;
-}
+import { Employer, EmployerFormData } from '@/types/employers';
 
 export function useEmployers() {
   const [employers, setEmployers] = useState<Employer[]>([]);

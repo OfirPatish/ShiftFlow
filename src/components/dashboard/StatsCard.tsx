@@ -24,15 +24,15 @@ export default function StatsCard({
   details,
   progressPercentage,
 }: StatsCardProps) {
-  // Determine background color based on accent
-  const getBgColor = () => {
+  // Determine colors based on accent
+  const getBorderColor = () => {
     switch (accentColor) {
       case 'green':
-        return 'bg-green-500/10';
+        return 'border-l-green-500';
       case 'blue':
-        return 'bg-blue-500/10';
+        return 'border-l-blue-500';
       default:
-        return 'bg-primary/10';
+        return 'border-l-primary';
     }
   };
 
@@ -40,29 +40,28 @@ export default function StatsCard({
   const getTextColor = () => {
     switch (accentColor) {
       case 'green':
-        return 'text-green-500';
+        return 'text-green-400';
       case 'blue':
-        return 'text-blue-500';
+        return 'text-blue-400';
       default:
-        return 'text-primary';
+        return 'text-primary-400';
     }
   };
 
-  // Determine text color for trend
+  // Determine trend colors
   const trendTextColor = trend === 'up' ? 'text-green-400' : 'text-red-400';
 
   return (
-    <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/30 rounded-lg shadow-lg p-6 relative overflow-hidden h-full">
-      <div
-        className={`absolute top-0 right-0 w-24 h-24 ${getBgColor()} rounded-bl-full opacity-80`}
-      ></div>
+    <div
+      className={`bg-gray-800/20 backdrop-blur-sm border border-gray-700/20 rounded-lg shadow p-4 relative overflow-hidden h-full border-l-4 ${getBorderColor()}`}
+    >
+      <h3 className="text-sm font-medium text-gray-400">{title}</h3>
 
-      <h3 className="text-sm font-medium text-gray-400 mb-1">{title}</h3>
       <div className="mt-2 flex items-end">
-        <span className="text-3xl font-bold text-white">{value}</span>
-        {unit && <span className="text-gray-400 ml-2 text-sm">{unit}</span>}
+        <span className="text-2xl font-semibold text-white">{value}</span>
+        {unit && <span className="text-gray-400 ml-1 text-xs">{unit}</span>}
         {trend && trendValue && (
-          <div className={`ml-auto ${trendTextColor} text-sm flex items-center`}>
+          <div className={`ml-auto ${trendTextColor} text-xs flex items-center`}>
             {trend === 'up' ? '↑' : '↓'}
             <span className="ml-1">{trendValue}</span>
           </div>
@@ -71,7 +70,7 @@ export default function StatsCard({
 
       {/* Progress bar if specified */}
       {progressPercentage !== undefined && (
-        <div className="mt-3 h-2 w-full bg-gray-700/50 rounded-full overflow-hidden">
+        <div className="mt-2 h-1 w-full bg-gray-700/30 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${getTextColor()}`}
             style={{ width: `${Math.min(100, progressPercentage)}%` }}
@@ -79,20 +78,20 @@ export default function StatsCard({
         </div>
       )}
 
-      {/* Details grid if provided */}
+      {/* Details if provided */}
       {details && details.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
           {details.map((detail, index) => (
-            <div key={index} className="bg-gray-800/70 p-2 rounded-md border border-gray-700/30">
-              <span className="text-gray-400 block mb-1">{detail.label}</span>
-              <div className="text-white font-medium">{detail.value}</div>
+            <div
+              key={index}
+              className="flex justify-between items-center border-t border-gray-700/20 pt-2"
+            >
+              <span className="text-gray-400">{detail.label}</span>
+              <span className="text-white font-medium">{detail.value}</span>
             </div>
           ))}
         </div>
       )}
-
-      {/* If no details are provided, add some space to maintain consistent height */}
-      {(!details || details.length === 0) && <div className="mt-4 py-6"></div>}
     </div>
   );
 }

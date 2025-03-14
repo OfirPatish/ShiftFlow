@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useShifts, Shift, ShiftFormData } from '@/hooks/useShifts';
+import { useShifts } from '@/hooks/useShifts';
+import { Shift, ShiftFormData } from '@/types/shifts';
 import { showSuccessToast, showErrorToast } from '@/lib/notificationToasts';
 import { startOfMonth, endOfMonth, isSameMonth } from 'date-fns';
 
