@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Rate, RateFormData } from '@/hooks/useRates';
+import { Rate, RateFormData } from '@/types/rates';
 import RateForm from './RateForm';
 import Modal from '@/components/common/Modal';
 import { X } from 'lucide-react';

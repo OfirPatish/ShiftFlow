@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, ChangeEvent } from 'react';
-import { useRates, Rate, RateFormData } from '@/hooks/useRates';
+import { useRates } from '@/hooks/useRates';
+import { Rate, RateFormData } from '@/types/rates';
 import { useEmployers } from '@/hooks/useEmployers';
 import { showSuccessToast, showErrorToast, showWarningToast } from '@/lib/notificationToasts';
 import RateCard from '@/components/rates/RateCard';

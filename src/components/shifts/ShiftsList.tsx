@@ -1,4 +1,4 @@
-import { Shift } from '@/hooks/useShifts';
+import { Shift } from '@/types/shifts';
 import { useEffect, useState } from 'react';
 import { ShiftCard } from './ShiftCard';
 

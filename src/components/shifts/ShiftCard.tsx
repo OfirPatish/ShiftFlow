@@ -1,4 +1,4 @@
-import { Shift } from '@/hooks/useShifts';
+import { Shift } from '@/types/shifts';
 import { MobileShiftCard } from './MobileShiftCard';
 import { DesktopShiftCard } from './DesktopShiftCard';
 import { formatCurrency, formatWithLeftSymbol } from '@/lib/currencyFormatter';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useEmployers } from '@/hooks/useEmployers';
-import { Rate, RateFormData } from '@/hooks/useRates';
+import { Rate, RateFormData } from '@/types/rates';
 import { format } from 'date-fns';
 import { Check, Trash2, Building2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/Button';

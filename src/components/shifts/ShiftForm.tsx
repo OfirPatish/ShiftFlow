@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Shift, ShiftFormData } from '@/hooks/useShifts';
+import { Shift, ShiftFormData } from '@/types/shifts';
 import { TextArea } from '@/components/ui/TextArea';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { useEmployers } from '@/hooks/useEmployers';

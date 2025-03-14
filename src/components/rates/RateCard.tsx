@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Rate } from '@/hooks/useRates';
+import { Rate } from '@/types/rates';
 import { MoreVertical, DollarSign } from 'lucide-react';
 import { useEmployers } from '@/hooks/useEmployers';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';

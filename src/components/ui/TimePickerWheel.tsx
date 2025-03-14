@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Picker from 'react-mobile-picker';
 import { cn } from '@/lib/tailwindUtils';
 import { Button } from './Button';
@@ -33,26 +33,34 @@ export function TimePickerWheel({
 }: TimePickerWheelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Get current time for default value
-  const getCurrentTime = () => {
+  // Wrap getCurrentTime in useCallback
+  const getCurrentTime = useCallback(() => {
+    if (value) {
+      const [hour, minute] = value.split(':');
+      return {
+        hour: hour.padStart(2, '0'),
+        minute: minute.padStart(2, '0'),
+      };
+    }
     const now = new Date();
-    const hour = now.getHours().toString().padStart(2, '0');
-    const minute = now.getMinutes().toString().padStart(2, '0');
-    return { hour, minute };
-  };
+    return {
+      hour: String(now.getHours()).padStart(2, '0'),
+      minute: String(now.getMinutes()).padStart(2, '0'),
+    };
+  }, [value]);
 
-  // Format current time as string (HH:MM)
-  const getCurrentTimeString = () => {
-    const { hour, minute } = getCurrentTime();
-    return `${hour}:${minute}`;
-  };
+  // Wrap getCurrentTimeString in useCallback
+  const getCurrentTimeString = useCallback(() => {
+    const time = getCurrentTime();
+    return `${time.hour}:${time.minute}`;
+  }, [getCurrentTime]);
 
   // If no value is provided, use current time on mount
   useEffect(() => {
     if (!value) {
       onChange(getCurrentTimeString());
     }
-  }, []);
+  }, [value, onChange, getCurrentTimeString]);
 
   const [pickerValue, setPickerValue] = useState<{ hour: string; minute: string }>(
     getCurrentTime()

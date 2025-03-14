@@ -1,4 +1,4 @@
-import { Shift } from '@/hooks/useShifts';
+import { Shift } from '@/types/shifts';
 import { Clock, MoreHorizontal, Calendar } from 'lucide-react';
 import { getCurrencySymbol } from '@/lib/currencyFormatter';
 

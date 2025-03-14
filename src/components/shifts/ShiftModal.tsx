@@ -1,4 +1,4 @@
-import { Shift, ShiftFormData } from '@/hooks/useShifts';
+import { Shift, ShiftFormData } from '@/types/shifts';
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Modal from '@/components/common/Modal';

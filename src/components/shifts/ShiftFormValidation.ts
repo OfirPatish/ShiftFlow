@@ -1,6 +1,6 @@
 import { UseFormSetError, UseFormClearErrors } from 'react-hook-form';
-import { addDays, format } from 'date-fns';
-import { ShiftFormData } from '@/hooks/useShifts';
+import { parseISO, isAfter, addDays, format } from 'date-fns';
+import { ShiftFormData } from '@/types/shifts';
 
 // Validate date and time inputs
 export const validateDateTimeInputs = (

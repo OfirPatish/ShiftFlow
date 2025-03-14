@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { EmployerFormData, Employer } from '@/hooks/useEmployers';
+import { EmployerFormData, Employer } from '@/types/employers';
 import { Check, Trash2, Building2, MapPin, Palette } from 'lucide-react';
 import { FormInput } from '@/components/ui/FormInput';
 import { ColorPicker } from '@/components/ui/ColorPicker';

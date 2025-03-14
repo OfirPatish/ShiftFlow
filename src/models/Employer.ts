@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, Document, model } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 import { getModel } from '@/lib/databaseConnection';
 
 /**

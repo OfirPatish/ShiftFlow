@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Check, Trash2 } from 'lucide-react';
-import { Shift } from '@/hooks/useShifts';
+import { Shift } from '@/types/shifts';
 
 interface ShiftFormActionsProps {
   shift?: Shift;

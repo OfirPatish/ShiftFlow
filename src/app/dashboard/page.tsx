@@ -1,205 +1,221 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useShifts } from '@/hooks/useShifts';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
-import { calculateMonthlyTotals } from '@/lib/shiftCalculator';
-import { showErrorToast, showInfoToast } from '@/lib/notificationToasts';
-import { FullPageSpinner } from '@/components/common/LoadingSpinner';
+import { startOfMonth, endOfMonth } from 'date-fns';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Import components
+import { FullPageSpinner } from '@/components/common/LoadingSpinner';
+import { useShifts } from '@/hooks/useShifts';
+import { showErrorToast } from '@/lib/notificationToasts';
+import { calculateMonthlyTotals } from '@/lib/shiftCalculator';
+import { MonthlyStats } from '@/types/dashboard';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import EmptyState from '@/components/dashboard/EmptyState';
 import ErrorState from '@/components/dashboard/ErrorState';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-
-// Import types
-import { MonthlyStats } from '@/types/dashboard';
 
 export default function Dashboard() {
   const router = useRouter();
   const { shifts, isLoading: apiLoading, fetchShifts, error } = useShifts();
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track if this is the initial load
+  const initialLoadRef = useRef(true);
 
-  // Statistics state
-  const [monthlyStats, setMonthlyStats] = useState<MonthlyStats>({
-    totalEarnings: 0,
-    totalHours: 0,
-    regularHours: 0,
-    overtimeHours: 0,
-    overtimeEarnings: 0,
-    shiftsCount: 0,
-  });
-  const [previousMonthStats, setPreviousMonthStats] = useState<MonthlyStats>({
-    totalEarnings: 0,
-    totalHours: 0,
-    regularHours: 0,
-    overtimeHours: 0,
-    overtimeEarnings: 0,
-    shiftsCount: 0,
-  });
-
-  // Controlled loading state that ensures minimum display time
+  // Separate state for UI loading and data loading
   const [isLoading, setIsLoading] = useState(true);
-  const minLoadingTime = 1000; // 1 second
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyStats>({
+    totalHours: 0,
+    totalEarnings: 0,
+    regularHours: 0,
+    overtimeHours: 0,
+    overtimeEarnings: 0,
+    shiftsCount: 0,
+  });
+
+  const [previousMonthStats, setPreviousMonthStats] = useState<MonthlyStats>({
+    totalHours: 0,
+    totalEarnings: 0,
+    regularHours: 0,
+    overtimeHours: 0,
+    overtimeEarnings: 0,
+    shiftsCount: 0,
+  });
+
+  // Handle initial loading with minimum display time
+  useEffect(() => {
+    // Start with loading state
+    if (initialLoadRef.current) {
+      document.documentElement.classList.add('loading');
+
+      // Minimum display time for the spinner (1 second)
+      const minDisplayTimer = setTimeout(() => {
+        if (!apiLoading) {
+          setIsLoading(false);
+          document.documentElement.classList.remove('loading');
+          initialLoadRef.current = false;
+        }
+      }, 1000);
+
+      // Safety timeout to prevent infinite loading (5 seconds)
+      const safetyTimer = setTimeout(() => {
+        if (isLoading) {
+          setIsLoading(false);
+          document.documentElement.classList.remove('loading');
+          initialLoadRef.current = false;
+        }
+      }, 5000);
+
+      return () => {
+        clearTimeout(minDisplayTimer);
+        clearTimeout(safetyTimer);
+      };
+    }
+  }, [apiLoading, isLoading]);
+
+  // Handle subsequent data fetches
+  useEffect(() => {
+    if (!initialLoadRef.current) {
+      if (apiLoading) {
+        setIsLoading(true);
+        document.documentElement.classList.add('loading');
+
+        // Clear any existing timeout
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+      } else {
+        // Minimum display time (800ms) for loading indicator even if data fetches quickly
+        loadingTimeoutRef.current = setTimeout(() => {
+          setIsLoading(false);
+          document.documentElement.classList.remove('loading');
+        }, 800);
+      }
+    }
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [apiLoading]);
+
+  // Ensure cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.documentElement.classList.remove('loading');
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Add check for authentication errors
   useEffect(() => {
     if (error) {
       if (error.includes('Unauthorized') || error.includes('401')) {
-        showErrorToast('Your session has expired. Redirecting to login...');
-        // Give time for the toast to be displayed before redirect
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 2000);
+        // Handle authentication error by redirecting to login
+        showErrorToast('Your session has expired. Please log in again.');
+        router.push('/login');
       } else {
-        // Always display errors as toast notifications
-        showErrorToast(`Error: ${error}`);
+        // Show error in UI
+        setFetchError(error);
       }
     }
   }, [error, router]);
 
-  // Fetch shifts when the selected month changes
+  // Fetch shifts data on mount or when selected month changes
   useEffect(() => {
-    const currentMonthStart = startOfMonth(selectedMonth);
-    const currentMonthEnd = endOfMonth(selectedMonth);
-
-    setFetchError(null);
-
-    // Fetch current month data with error handling
     const fetchData = async () => {
       try {
+        // Get start and end dates for the selected month
+        const startDate = startOfMonth(selectedMonth);
+        const endDate = endOfMonth(selectedMonth);
+
+        // Call the fetchShifts function with the date range
         await fetchShifts({
-          startDate: currentMonthStart,
-          endDate: currentMonthEnd,
+          startDate,
+          endDate,
         });
-      } catch (error) {
-        // Error is already handled in the useShifts hook
+
+        // Fetch previous month data for trend comparison
+        const previousMonthDate = new Date(selectedMonth);
+        previousMonthDate.setMonth(previousMonthDate.getMonth() - 1);
+        const prevStartDate = startOfMonth(previousMonthDate);
+        const prevEndDate = endOfMonth(previousMonthDate);
+
+        // Fetch previous month data without triggering loading state
+        try {
+          // We use a separate fetch for previous month data without affecting loading state
+          const prevMonthShifts = await fetch(
+            `/api/shifts?startDate=${prevStartDate.toISOString()}&endDate=${prevEndDate.toISOString()}`
+          )
+            .then((res) => res.json())
+            .then((data) => data.shifts || []);
+
+          if (prevMonthShifts.length > 0) {
+            const prevStats = calculateMonthlyTotals(prevMonthShifts);
+            setPreviousMonthStats({
+              ...prevStats,
+              shiftsCount: prevMonthShifts.length,
+            });
+          }
+        } catch (prevMonthError) {
+          // Silently handle errors for previous month - we'll just use zero values
+          // We don't show this error to the user as it's not critical
+          // eslint-disable-next-line no-console
+          console.warn('Failed to fetch previous month data', prevMonthError);
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch shifts';
+        setFetchError(errorMessage);
       }
     };
 
     fetchData();
-    fetchPreviousMonthData();
   }, [fetchShifts, selectedMonth]);
 
-  // Fetch previous month data for comparison
-  const fetchPreviousMonthData = async () => {
-    try {
-      // In a production app, you would make an actual API call here
-      // For now, we'll simulate it with a timeout and dummy data
-      setTimeout(() => {
-        // This is just a placeholder. In a real app, you would call your API
-        const previousMonthData = {
-          totalEarnings: 0,
-          totalHours: 0,
-          regularHours: 0,
-          overtimeHours: 0,
-          overtimeEarnings: 0,
-          shiftsCount: 0,
-        };
-
-        // If we have shifts data, calculate some comparison stats
-        if (shifts && shifts.length > 0) {
-          previousMonthData.totalEarnings = monthlyStats.totalEarnings * 0.9;
-          previousMonthData.totalHours = monthlyStats.totalHours * 0.85;
-          previousMonthData.regularHours = monthlyStats.regularHours * 0.9;
-          previousMonthData.overtimeHours = monthlyStats.overtimeHours * 0.7;
-          previousMonthData.overtimeEarnings = (monthlyStats.overtimeEarnings || 0) * 0.7;
-          previousMonthData.shiftsCount = Math.max(0, monthlyStats.shiftsCount - 2);
-        }
-
-        setPreviousMonthStats(previousMonthData);
-      }, 500);
-    } catch (error: any) {
-      // Log for debugging but use toast for user feedback
-      showErrorToast(`Error with previous month data: ${error.message || 'Unknown error'}`);
+  // Calculate monthly statistics when shifts change
+  useEffect(() => {
+    if (shifts) {
+      try {
+        const stats = calculateMonthlyTotals(shifts);
+        setMonthlyStats({
+          ...stats,
+          shiftsCount: shifts.length,
+        });
+      } catch (error) {
+        // Log error but don't show to user as the UI can still function
+        // eslint-disable-next-line no-console
+        console.error('Error calculating statistics', error);
+      }
     }
-  };
+  }, [shifts]);
 
   // Handle month change
   const handleMonthChange = (startDate: Date, endDate: Date, currentMonth: Date) => {
     setSelectedMonth(currentMonth);
-    showInfoToast(`Viewing shifts for ${format(currentMonth, 'MMMM yyyy')}`);
   };
 
-  // Handle loading state with minimum display time
-  useEffect(() => {
-    if (apiLoading) {
-      setIsLoading(true);
-    } else {
-      // When API loading is done, wait for minimum display time
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, minLoadingTime);
-
-      return () => clearTimeout(timer);
-    }
-  }, [apiLoading, minLoadingTime]);
-
-  // Calculate monthly stats whenever shifts change
-  useEffect(() => {
-    if (shifts && shifts.length > 0) {
-      // Calculate monthly totals
-      const { totalEarnings, totalHours, regularHours, overtimeHours } =
-        calculateMonthlyTotals(shifts);
-
-      // Calculate overtime earnings (total - regular)
-      const regularEarnings = shifts.reduce((total, shift) => total + shift.regularEarnings, 0);
-      const overtimeEarnings = totalEarnings - regularEarnings;
-
-      setMonthlyStats({
-        totalEarnings,
-        totalHours,
-        regularHours,
-        overtimeHours,
-        overtimeEarnings,
-        shiftsCount: shifts.length,
-      });
-    } else {
-      // Reset stats if no shifts
-      setMonthlyStats({
-        totalEarnings: 0,
-        totalHours: 0,
-        regularHours: 0,
-        overtimeHours: 0,
-        overtimeEarnings: 0,
-        shiftsCount: 0,
-      });
-    }
-  }, [shifts]);
-
-  // Handle retry action from error state
+  // Handle retry on error
   const handleRetry = (startDate: Date, endDate: Date) => {
-    fetchShifts({
-      startDate,
-      endDate,
-    });
+    setFetchError(null);
+    fetchShifts({ startDate, endDate });
   };
 
-  // Always show loading indicator first
+  // Dashboard render logic with clear conditions
   if (isLoading) {
     return <FullPageSpinner />;
   }
 
-  // Replace the fetchError error display with a more user-friendly empty state
   if (fetchError) {
-    showErrorToast(`Error loading your shifts: ${fetchError}`);
-    return (
-      <div className="container mx-auto px-4 md:px-6 lg:px-16 xl:px-24 py-8">
-        <DashboardHeader selectedMonth={selectedMonth} onMonthChange={handleMonthChange} />
-        <ErrorState selectedMonth={selectedMonth} onRetry={handleRetry} />
-      </div>
-    );
+    return <ErrorState selectedMonth={selectedMonth} onRetry={handleRetry} />;
   }
 
-  // After loading, show either empty state or dashboard content
   if (!shifts || shifts.length === 0) {
     return <EmptyState selectedMonth={selectedMonth} onMonthChange={handleMonthChange} />;
   }
 
-  // Show dashboard content if there are shifts
+  // Dashboard content
   return (
     <DashboardContent
       shifts={shifts}

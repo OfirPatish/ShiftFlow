@@ -1,4 +1,4 @@
-import { Shift } from '@/hooks/useShifts';
+import { Shift } from '@/types/shifts';
 import { MonthlyStats } from '@/types/dashboard';
 import StatsGrid from './StatsGrid';
 import QuickTips from './QuickTips';

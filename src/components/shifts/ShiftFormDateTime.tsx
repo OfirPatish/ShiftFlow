@@ -2,7 +2,7 @@ import React from 'react';
 import { DatePickerWheel } from '@/components/ui/DatePickerWheel';
 import { TimePickerWheel } from '@/components/ui/TimePickerWheel';
 import { UseFormClearErrors } from 'react-hook-form';
-import { ShiftFormData } from '@/hooks/useShifts';
+import { ShiftFormData } from '@/types/shifts';
 
 interface ShiftFormDateTimeProps {
   startDate: string;

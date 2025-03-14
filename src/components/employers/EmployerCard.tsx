@@ -1,6 +1,6 @@
 'use client';
 
-import { Employer } from '@/hooks/useEmployers';
+import { Employer } from '@/types/employers';
 import { MoreVertical } from 'lucide-react';
 import {
   Card,

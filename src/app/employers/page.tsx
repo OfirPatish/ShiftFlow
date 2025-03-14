@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useEmployers, Employer, EmployerFormData } from '@/hooks/useEmployers';
+import { useEmployers } from '@/hooks/useEmployers';
+import { Employer, EmployerFormData } from '@/types/employers';
 import EmployerCard from '@/components/employers/EmployerCard';
 import EmptyEmployers from '@/components/employers/EmptyEmployers';
 import EmployerModal from '@/components/employers/EmployerModal';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Employer, EmployerFormData } from '@/hooks/useEmployers';
+import { Employer, EmployerFormData } from '@/types/employers';
 import EmployerForm from './EmployerForm';
 import Modal from '@/components/common/Modal';
 import { X } from 'lucide-react';
