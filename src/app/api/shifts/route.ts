@@ -106,8 +106,14 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     return errorResponse('Invalid date format for startTime or endTime', 400);
   }
 
-  if (startTime >= endTime) {
-    return errorResponse('Start time must be before end time', 400);
+  // For overnight shifts, end time can be before start time in terms of hours,
+  // but the actual date objects should have end time on the next day,
+  // which means end time will be after start time
+  if (endTime <= startTime) {
+    return errorResponse(
+      'End time must be after start time. For overnight shifts, make sure the end date is set to the next day.',
+      400
+    );
   }
 
   try {

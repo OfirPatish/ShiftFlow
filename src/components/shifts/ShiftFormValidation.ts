@@ -49,8 +49,9 @@ export const validateDateTimeInputs = (
       return false;
     }
 
+    // For overnight shifts, we allow end time to be before or after start time
     // For non-overnight shifts, verify end time is after start time
-    if (!isOvernightShift && endTotalMinutes < startTotalMinutes) {
+    if (!isOvernightShift && endTotalMinutes <= startTotalMinutes) {
       setError('endTime', {
         message: 'End time must be after start time or check "Overnight Shift"',
       });
@@ -84,15 +85,19 @@ export const processFormData = (
 
   // For overnight shifts, adjust the end time to be on the next day
   if (isOvernightShift && startTime && endTime) {
+    // Get start and end hour/minute values
+    const [startHour, startMinute] = startTime.split(':').map((num) => parseInt(num, 10));
     const [endHour, endMinute] = endTime.split(':').map((num) => parseInt(num, 10));
 
-    // Parse the end date from the startDate and endTime
-    const endDateObj = new Date(startDate);
-    endDateObj.setHours(endHour);
-    endDateObj.setMinutes(endMinute);
+    // Create proper date objects for comparison
+    const startDateTime = new Date(startDate);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
 
-    // Add one day to the end date
-    const nextDayEndDate = addDays(endDateObj, 1);
+    const endDateTime = new Date(startDate);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
+
+    // Always add one day for overnight shifts
+    const nextDayEndDate = addDays(endDateTime, 1);
 
     // Update the endTime with the next day date
     data.endTime = format(nextDayEndDate, "yyyy-MM-dd'T'HH:mm");
