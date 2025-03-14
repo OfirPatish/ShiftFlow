@@ -17,8 +17,6 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
 
   // Format day and date for display
   const dayDateDisplay = formatDayDate(startDate);
-  // We'll use the shorter format for both mobile and desktop
-  // const fullDateDisplay = formatFullDate(startDate);
 
   // Format time range
   const timeRange = formatTimeRange(startDate, endDate);
@@ -27,7 +25,7 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
   const rate = typeof shift.rateId === 'object' ? shift.rateId : null;
   const hourlyRateDisplay = rate ? formatWithLeftSymbol(rate.baseRate) : 'N/A';
 
-  // Format earnings for display
+  // Format earnings for display - without currency symbol
   const earningsAmount = formatCurrency(shift.totalEarnings);
 
   // Check if shift has overtime hours
@@ -37,8 +35,7 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
     shift,
     onClick,
     dayDateDisplay,
-    // Use dayDateDisplay for both mobile and desktop
-    fullDateDisplay: dayDateDisplay,
+    fullDateDisplay: dayDateDisplay, // Use same format for both views
     timeRange,
     hourlyRateDisplay,
     earningsAmount,
