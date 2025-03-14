@@ -83,7 +83,6 @@ export default function Shifts() {
         title="Delete Shift"
         message="Are you sure you want to delete this shift? This action cannot be undone."
         confirmText="Delete"
-        cancelText="Cancel"
         isDestructive={true}
       />
     </div>

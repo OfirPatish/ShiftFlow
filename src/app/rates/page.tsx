@@ -163,7 +163,6 @@ export default function Rates() {
         title="Delete Pay Rate"
         message="Are you sure you want to delete this pay rate? This action cannot be undone."
         confirmText="Delete"
-        cancelText="Cancel"
         isDestructive={true}
       />
     </div>

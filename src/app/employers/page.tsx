@@ -162,7 +162,6 @@ export default function Employers() {
         title="Delete Employer"
         message="Are you sure you want to delete this employer? This action cannot be undone."
         confirmText="Delete"
-        cancelText="Cancel"
         isDestructive={true}
       />
     </div>
