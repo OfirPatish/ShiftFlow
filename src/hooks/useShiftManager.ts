@@ -66,7 +66,10 @@ export function useShiftManager() {
     // Only close the modal if the delete confirmation dialog is not open
     if (!isDeleteConfirmOpen) {
       setIsModalOpen(false);
-      setCurrentShift(undefined);
+      // Add a small delay before resetting currentShift to prevent UI flicker
+      setTimeout(() => {
+        setCurrentShift(undefined);
+      }, 300); // 300ms matches transition duration
     }
   };
 
@@ -97,8 +100,12 @@ export function useShiftManager() {
         }
       }
 
+      // First close the modal
       setIsModalOpen(false);
-      setCurrentShift(undefined);
+      // Then reset current shift with a delay to prevent UI glitches
+      setTimeout(() => {
+        setCurrentShift(undefined);
+      }, 300);
     } catch (error: any) {
       console.error('Error saving shift:', error);
       showErrorToast(`Failed to save shift: ${error.message || 'Unknown error'}`);
@@ -139,7 +146,10 @@ export function useShiftManager() {
         await deleteShift(shiftToDelete);
         showSuccessToast('Shift deleted successfully');
         setIsModalOpen(false);
-        setCurrentShift(undefined);
+        // Add delay for state reset
+        setTimeout(() => {
+          setCurrentShift(undefined);
+        }, 300);
       } catch (error: any) {
         console.error('Error deleting shift:', error);
         showErrorToast(`Failed to delete shift: ${error.message || 'Unknown error'}`);

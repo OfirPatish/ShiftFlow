@@ -36,6 +36,11 @@ export default function Modal({
       e.stopPropagation();
       return;
     }
+    // Otherwise, ensure the click is on the backdrop itself (not on the panel)
+    // by checking if the target is the same as the currentTarget
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
 
   return (
@@ -58,7 +63,10 @@ export default function Modal({
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div
+            className="flex min-h-full items-center justify-center p-4 text-center"
+            onClick={handleBackdropClick}
+          >
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
