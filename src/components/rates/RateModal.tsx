@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Rate, RateFormData } from '@/hooks/useRates';
 import RateForm from './RateForm';
 import Modal from '@/components/common/Modal';

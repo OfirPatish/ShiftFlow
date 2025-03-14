@@ -1,5 +1,5 @@
 import { Shift, ShiftFormData } from '@/hooks/useShifts';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Modal from '@/components/common/Modal';
 import ShiftForm from './ShiftForm';

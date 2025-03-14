@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Employer, EmployerFormData } from '@/hooks/useEmployers';
 import EmployerForm from './EmployerForm';
 import Modal from '@/components/common/Modal';
