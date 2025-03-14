@@ -32,10 +32,31 @@ export function TimePickerWheel({
   required,
 }: TimePickerWheelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [pickerValue, setPickerValue] = useState<{ hour: string; minute: string }>({
-    hour: '09',
-    minute: '00',
-  });
+
+  // Get current time for default value
+  const getCurrentTime = () => {
+    const now = new Date();
+    const hour = now.getHours().toString().padStart(2, '0');
+    const minute = now.getMinutes().toString().padStart(2, '0');
+    return { hour, minute };
+  };
+
+  // Format current time as string (HH:MM)
+  const getCurrentTimeString = () => {
+    const { hour, minute } = getCurrentTime();
+    return `${hour}:${minute}`;
+  };
+
+  // If no value is provided, use current time on mount
+  useEffect(() => {
+    if (!value) {
+      onChange(getCurrentTimeString());
+    }
+  }, []);
+
+  const [pickerValue, setPickerValue] = useState<{ hour: string; minute: string }>(
+    getCurrentTime()
+  );
 
   const inputId = id || `time-picker-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -44,6 +65,9 @@ export function TimePickerWheel({
     if (value) {
       const [hour, minute] = value.split(':');
       setPickerValue({ hour, minute });
+    } else {
+      // If no value is provided, use current time
+      setPickerValue(getCurrentTime());
     }
   }, [value]);
 
