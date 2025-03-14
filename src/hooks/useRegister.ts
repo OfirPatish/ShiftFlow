@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import { logError } from '@/lib/errorHandlers';
 
 export function useRegister() {
   const router = useRouter();
@@ -149,6 +150,8 @@ export function useRegister() {
       // Redirect to login page on success
       router.push('/auth/login?registered=true');
     } catch (error) {
+      logError('Registration', error);
+
       if (error instanceof Error) {
         setError(error.message);
       } else {

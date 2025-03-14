@@ -124,7 +124,7 @@ export async function preloadModels() {
     await import('@/models/Shift');
     await import('@/models/UserSettings');
 
-    console.log('All models preloaded successfully');
+    //console.log('All models preloaded successfully');
   } catch (error) {
     console.error('Error preloading models:', error);
   }

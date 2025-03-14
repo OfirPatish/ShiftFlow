@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useState, useRef, useEffect } from 'react';
 import {
   Calendar,
@@ -15,6 +15,7 @@ import {
   LogOut,
   DollarSign,
 } from 'lucide-react';
+import { broadcastSignOut } from '@/context/AuthContext';
 
 interface SidebarProps {}
 
@@ -39,7 +40,8 @@ const Sidebar = () => {
   }, []);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+    // Trigger sign-out across tabs using our simplified method
+    await broadcastSignOut({ callbackUrl: '/auth/login' });
   };
 
   const navigationItems = [

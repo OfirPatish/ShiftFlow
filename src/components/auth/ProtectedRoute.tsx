@@ -1,9 +1,10 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { ReactNode } from 'react';
+import { broadcastSignOut } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -32,10 +33,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     // Case 2: Session exists but is expired
     if (session.expired) {
       isRedirecting.current = true;
-      // Sign out properly first
-      signOut({ redirect: false }).then(() => {
-        router.push(`/auth/login?callbackUrl=${encodeURIComponent(pathname)}`);
-      });
+      // Simply redirect to login rather than triggering another signOut
+      router.push(`/auth/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
   }, [session, status, router, pathname]);
 

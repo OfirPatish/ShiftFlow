@@ -142,6 +142,26 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      {/* Add a hidden script to ensure the page is properly reset after logout */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            // Clear any NextAuth.js related cached items in sessionStorage
+            try {
+              Object.keys(sessionStorage).forEach(key => {
+                if (key.startsWith('nextauth.message') || key.includes('csrf-token')) {
+                  sessionStorage.removeItem(key);
+                }
+              });
+            } catch (e) {
+              // Silent error handling for browser storage issues
+              // We don't want to break the login page if sessionStorage is not available
+              // This could happen in private browsing mode or very old browsers
+            }
+          `,
+        }}
+      />
     </AuthLayout>
   );
 }

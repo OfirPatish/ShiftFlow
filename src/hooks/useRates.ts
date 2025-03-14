@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { showErrorToast } from '@/lib/notificationToasts';
+import { logError } from '@/lib/errorHandlers';
 
 export interface Rate {
   _id: string;
@@ -84,8 +85,8 @@ export function useRates(employerId?: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
-      // We don't show toast here as the caller is expected to handle the error display
-      console.error('Error fetching rate:', err);
+      // Log the error but don't show toast as the caller is expected to handle the error display
+      logError('Rates', err);
       throw err;
     }
   };
@@ -131,8 +132,8 @@ export function useRates(employerId?: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
-      // We don't show toast here as the caller is expected to handle the error display
-      console.error('Error creating rate:', err);
+      // Log the error but don't show toast as the caller is expected to handle the error display
+      logError('Rates', err);
       throw err;
     }
   };

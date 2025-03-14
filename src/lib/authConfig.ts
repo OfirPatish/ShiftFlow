@@ -12,6 +12,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
 import { connectToDatabase } from '@/lib/databaseConnection';
+import { logError } from '@/lib/errorHandlers';
 
 // Session duration constants
 const STANDARD_SESSION_DURATION = 4 * 60 * 60; // 4 hours in seconds
@@ -91,7 +92,7 @@ export const authOptions: NextAuthOptions = {
             remember: isRemembered,
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          logError('Auth', error);
           return null;
         }
       },
@@ -101,7 +102,6 @@ export const authOptions: NextAuthOptions = {
   // Custom pages for authentication flows
   pages: {
     signIn: '/auth/login',
-    signOut: '/auth/logout',
     error: '/auth/error',
     newUser: '/auth/register',
   },
@@ -168,7 +168,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  // Cookie security settings
+  // Cookies security settings
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,
@@ -181,6 +181,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  // Enable debug mode in development
-  debug: process.env.NODE_ENV === 'development',
+  // Disable debug mode to prevent response body errors
+  debug: false,
 };

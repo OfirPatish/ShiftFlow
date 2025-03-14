@@ -2,6 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import { logError } from '@/lib/errorHandlers';
+
+// Import the key from AuthContext or define it here if importing would create circular dependencies
+const LOGOUT_EVENT_KEY = 'shiftflow_logout_timestamp';
 
 export function useLogin() {
   const router = useRouter();
@@ -13,6 +17,16 @@ export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
+
+  // Clear any logout events on mount
+  useEffect(() => {
+    try {
+      // Remove any leftover logout events to prevent interference with login
+      localStorage.removeItem(LOGOUT_EVENT_KEY);
+    } catch (error) {
+      logError('LoginHook', error);
+    }
+  }, []);
 
   // Check URL params and auto-focus
   useEffect(() => {
@@ -37,6 +51,13 @@ export function useLogin() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+
+    // Clear any logout events from localStorage to ensure clean login
+    try {
+      localStorage.removeItem(LOGOUT_EVENT_KEY);
+    } catch (error) {
+      logError('LoginHook', error);
+    }
 
     // Validate inputs
     if (!email.trim()) {
@@ -72,8 +93,11 @@ export function useLogin() {
         return;
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      // Add a small delay before redirect to ensure the session is properly established
+      setTimeout(() => {
+        router.push('/dashboard');
+        router.refresh();
+      }, 100);
     } catch (error) {
       setError('An error occurred during login');
       setIsLoading(false);

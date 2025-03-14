@@ -5,6 +5,7 @@ import Rate from '@/models/Rate';
 import Shift from '@/models/Shift';
 import { authOptions } from '@/lib/authConfig';
 import mongoose from 'mongoose';
+import { withErrorHandling, errorResponse } from '@/lib/apiResponses';
 
 // Helper for authentication and rate retrieval
 async function getAuthorizedRate(req: NextRequest, params: { id: string }) {
@@ -35,31 +36,34 @@ async function getAuthorizedRate(req: NextRequest, params: { id: string }) {
 }
 
 // GET /api/rates/[id] - Get a specific rate
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const GET = withErrorHandling(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
     const result = await getAuthorizedRate(req, params);
 
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return errorResponse(result.error as string, result.status);
     }
 
     return NextResponse.json(result.rate);
-  } catch (error) {
-    console.error('Error fetching rate:', error);
-    return NextResponse.json({ error: 'Failed to fetch rate' }, { status: 500 });
   }
-}
+);
 
 // PATCH /api/rates/[id] - Update a specific rate
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const PATCH = withErrorHandling(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
     const result = await getAuthorizedRate(req, params);
 
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return errorResponse(result.error as string, result.status);
     }
 
-    const data = await req.json();
+    let data;
+    try {
+      data = await req.json();
+    } catch (error) {
+      return errorResponse('Invalid JSON body', 400);
+    }
+
     const { rate } = result;
 
     // Update allowed fields
@@ -67,20 +71,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (data.baseRate !== undefined) {
       if (typeof data.baseRate !== 'number' || data.baseRate < 0) {
-        return NextResponse.json(
-          { error: 'baseRate must be a non-negative number' },
-          { status: 400 }
-        );
+        return errorResponse('baseRate must be a non-negative number', 400);
       }
       rate.baseRate = data.baseRate;
     }
 
     if (data.currency) {
       if (!['ILS', 'USD', 'EUR'].includes(data.currency)) {
-        return NextResponse.json(
-          { error: 'currency must be one of: ILS, USD, EUR' },
-          { status: 400 }
-        );
+        return errorResponse('currency must be one of: ILS, USD, EUR', 400);
       }
       rate.currency = data.currency;
     }
@@ -88,109 +86,97 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (data.effectiveDate) {
       const date = new Date(data.effectiveDate);
       if (isNaN(date.getTime())) {
-        return NextResponse.json({ error: 'Invalid effectiveDate' }, { status: 400 });
+        return errorResponse('Invalid effectiveDate', 400);
       }
       rate.effectiveDate = date;
     }
 
+    // Handle isDefault status changes
     if (data.isDefault !== undefined) {
-      // If setting as default, unset any other defaults for this employer
-      if (data.isDefault === true) {
+      // Can't unset the only default rate
+      if (data.isDefault === false && rate.isDefault) {
+        // Check if this is the only default rate for this employer
+        const defaultRatesCount = await Rate.countDocuments({
+          userId: result.session.user.id,
+          employerId: rate.employerId,
+          isDefault: true,
+        });
+
+        if (defaultRatesCount <= 1) {
+          return errorResponse(
+            'Cannot unset the only default rate. Set another rate as default first.',
+            400
+          );
+        }
+      }
+
+      rate.isDefault = !!data.isDefault;
+
+      // If setting to default, unset all other default rates for this employer
+      if (rate.isDefault) {
         await Rate.updateMany(
           {
-            userId: rate.userId,
-            employerId: rate.employerId,
             _id: { $ne: rate._id },
+            userId: result.session.user.id,
+            employerId: rate.employerId,
             isDefault: true,
           },
           { $set: { isDefault: false } }
         );
       }
-      // If trying to unset default status, ensure it's not the only default rate
-      else if (data.isDefault === false && rate.isDefault === true) {
-        // Count how many default rates exist for this employer
-        const defaultRatesCount = await Rate.countDocuments({
-          userId: rate.userId,
-          employerId: rate.employerId,
-          isDefault: true,
-        });
-
-        // If this is the only default rate, prevent unsetting
-        if (defaultRatesCount <= 1) {
-          return NextResponse.json(
-            { error: 'Cannot unset the only default rate. Set another rate as default first.' },
-            { status: 400 }
-          );
-        }
-      }
-      rate.isDefault = data.isDefault;
     }
 
+    // Save the updated rate
     await rate.save();
 
     return NextResponse.json(rate);
-  } catch (error) {
-    console.error('Error updating rate:', error);
-    return NextResponse.json({ error: 'Failed to update rate' }, { status: 500 });
   }
-}
+);
 
 // DELETE /api/rates/[id] - Delete a specific rate
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const DELETE = withErrorHandling(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
     const result = await getAuthorizedRate(req, params);
 
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return errorResponse(result.error as string, result.status);
     }
 
     const { rate } = result;
 
-    // Check if this rate is used in any shifts
-    const shiftsWithRate = await Shift.countDocuments({
-      userId: result.session.user.id,
-      rateId: rate._id,
-    });
-
-    if (shiftsWithRate > 0) {
-      return NextResponse.json(
-        {
-          error: 'Cannot delete rate used in shifts',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Check if this is a default rate and if there are other rates for this employer
+    // Check if the rate is default
     if (rate.isDefault) {
+      // Check if there are other rates we can make default
       const otherRates = await Rate.find({
+        _id: { $ne: rate._id },
         userId: result.session.user.id,
         employerId: rate.employerId,
-        _id: { $ne: rate._id },
-      });
+      }).sort({ createdAt: -1 });
 
       if (otherRates.length > 0) {
-        // Set another rate as default
+        // Make the most recently created rate the new default
         const newDefault = otherRates[0];
         newDefault.isDefault = true;
         await newDefault.save();
       } else {
-        // If this is the only rate for the employer, prevent deletion
-        return NextResponse.json(
-          {
-            error: 'Cannot delete the only rate for an employer',
-          },
-          { status: 400 }
-        );
+        // If this is the only rate, allow deletion (since there will be no rates left)
+        // But warn clients that they should create new rates
       }
     }
 
-    // Delete the rate
-    await rate.deleteOne();
+    // Check if the rate is used in any shifts
+    const shiftsCount = await Shift.countDocuments({ rateId: rate._id });
+    if (shiftsCount > 0) {
+      return errorResponse(
+        `Cannot delete rate because it is used in ${shiftsCount} shifts. 
+        Please change the rate on those shifts before deleting.`,
+        400
+      );
+    }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting rate:', error);
-    return NextResponse.json({ error: 'Failed to delete rate' }, { status: 500 });
+    // Delete the rate
+    await Rate.deleteOne({ _id: rate._id });
+
+    return NextResponse.json({ success: true, message: 'Rate deleted successfully' });
   }
-}
+);

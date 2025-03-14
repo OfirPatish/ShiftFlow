@@ -6,7 +6,8 @@ import { useSettings } from '@/hooks/useSettings';
 import { useEmployers } from '@/hooks/useEmployers';
 import { useState, useEffect, useRef } from 'react';
 import { useRates } from '@/hooks/useRates';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { broadcastSignOut } from '@/context/AuthContext';
 
 interface Rate {
   _id: string;
@@ -43,7 +44,8 @@ const Header = () => {
   }, []);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+    // Trigger sign-out across tabs using our simplified method
+    await broadcastSignOut({ callbackUrl: '/auth/login' });
   };
 
   // Find employer name
