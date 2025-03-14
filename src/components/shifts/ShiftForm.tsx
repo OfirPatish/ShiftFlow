@@ -57,25 +57,6 @@ export default function ShiftForm({
   // Date validation error state
   const [dateError, setDateError] = useState<string | null>(null);
 
-  const [isOvernightShift, setIsOvernightShift] = useState<boolean>(() => {
-    // If editing a shift, detect if it's overnight by checking if end time is earlier than start time
-    if (shift && shift.startTime && shift.endTime) {
-      const startDate = new Date(shift.startTime);
-      const endDate = new Date(shift.endTime);
-
-      const startHours = startDate.getHours();
-      const startMinutes = startDate.getMinutes();
-      const endHours = endDate.getHours();
-      const endMinutes = endDate.getMinutes();
-
-      const startTotalMinutes = startHours * 60 + startMinutes;
-      const endTotalMinutes = endHours * 60 + endMinutes;
-
-      return endTotalMinutes < startTotalMinutes;
-    }
-    return false;
-  });
-
   // Initialize the form with defaults or existing shift data
   const {
     register,
@@ -100,9 +81,9 @@ export default function ShiftForm({
             ? shift.rateId._id
             : (shift.rateId as string)
           : defaultRateId || '',
+      breakDuration: shift?.breakDuration || 0,
       notes: shift?.notes || '',
     },
-    mode: 'onChange',
   });
 
   const watchEmployerId = watch('employerId');
@@ -175,7 +156,6 @@ export default function ShiftForm({
         startDate,
         startTime,
         endTime,
-        isOvernightShift,
         setError,
         clearErrors,
         setDateError,
@@ -188,13 +168,7 @@ export default function ShiftForm({
       }
 
       // Process form data using the extracted utility
-      const processedData = processFormData(
-        formData,
-        startDate,
-        startTime,
-        endTime,
-        isOvernightShift
-      );
+      const processedData = processFormData(formData, startDate, startTime, endTime);
 
       // No need to check for existing shifts here - we already do that in the DatePickerWheel
       // The server will also validate and prevent duplicate shifts on the same day
@@ -245,8 +219,6 @@ export default function ShiftForm({
           setStartTime={setStartTime}
           endTime={endTime}
           setEndTime={setEndTime}
-          isOvernightShift={isOvernightShift}
-          setIsOvernightShift={setIsOvernightShift}
           dateError={dateError}
           setDateError={setDateError}
           errors={errors}

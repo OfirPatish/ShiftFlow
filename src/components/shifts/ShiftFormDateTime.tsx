@@ -12,8 +12,6 @@ interface ShiftFormDateTimeProps {
   setStartTime: (value: string) => void;
   endTime: string;
   setEndTime: (value: string) => void;
-  isOvernightShift: boolean;
-  setIsOvernightShift: (value: boolean) => void;
   dateError: string | null;
   setDateError: (error: string | null) => void;
   errors: any;
@@ -28,8 +26,6 @@ export const ShiftFormDateTime: React.FC<ShiftFormDateTimeProps> = ({
   setStartTime,
   endTime,
   setEndTime,
-  isOvernightShift,
-  setIsOvernightShift,
   dateError,
   setDateError,
   errors,
@@ -144,24 +140,6 @@ export const ShiftFormDateTime: React.FC<ShiftFormDateTimeProps> = ({
           helperText={errors.endTime?.message || ''}
           required
         />
-      </div>
-
-      {/* Overnight Shift Toggle */}
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="overnightShift"
-          checked={isOvernightShift}
-          onChange={(e) => {
-            setIsOvernightShift(e.target.checked);
-            // Clear any time-related errors when overnight setting changes
-            clearErrors('endTime');
-          }}
-          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-        />
-        <label htmlFor="overnightShift" className="text-sm text-gray-600">
-          Overnight Shift (if end time is before start time)
-        </label>
       </div>
     </>
   );
