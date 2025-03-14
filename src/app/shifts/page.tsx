@@ -56,8 +56,8 @@ export default function Shifts() {
           <MonthSelector currentDate={selectedMonth} onChange={handleMonthChange} />
         </div>
 
-        {/* Content Section with enhanced styling */}
-        <div className="sm:bg-gray-800/30 sm:backdrop-blur-sm sm:rounded-xl sm:border sm:border-gray-700/40 sm:shadow-xl sm:overflow-hidden sm:p-4 p-0">
+        {/* Content Section without background container */}
+        <div className="p-0">
           <ShiftsList shifts={shifts} onShiftClick={handleShiftClick} />
         </div>
       </div>
