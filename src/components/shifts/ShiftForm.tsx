@@ -1,17 +1,16 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Shift, ShiftFormData } from '@/hooks/useShifts';
-import { ReactNode } from 'react';
-import { FormInput } from '@/components/ui/FormInput';
 import { TextArea } from '@/components/ui/TextArea';
-import { Check, Trash2 } from 'lucide-react';
-import { TimePickerWheel } from '@/components/ui/TimePickerWheel';
-import { DatePickerWheel } from '@/components/ui/DatePickerWheel';
-import { Button } from '@/components/ui/Button';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { useEmployers } from '@/hooks/useEmployers';
 import { useSettings } from '@/hooks/useSettings';
-import { format, isBefore, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+
+// Import new components and utilities
+import { ShiftFormDateTime } from './ShiftFormDateTime';
+import { ShiftFormActions } from './ShiftFormActions';
+import { validateDateTimeInputs, processFormData } from './ShiftFormValidation';
 
 interface ShiftFormProps {
   shift?: Shift;
@@ -57,6 +56,25 @@ export default function ShiftForm({
 
   // Date validation error state
   const [dateError, setDateError] = useState<string | null>(null);
+
+  const [isOvernightShift, setIsOvernightShift] = useState<boolean>(() => {
+    // If editing a shift, detect if it's overnight by checking if end time is earlier than start time
+    if (shift && shift.startTime && shift.endTime) {
+      const startDate = new Date(shift.startTime);
+      const endDate = new Date(shift.endTime);
+
+      const startHours = startDate.getHours();
+      const startMinutes = startDate.getMinutes();
+      const endHours = endDate.getHours();
+      const endMinutes = endDate.getMinutes();
+
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
+
+      return endTotalMinutes < startTotalMinutes;
+    }
+    return false;
+  });
 
   // Initialize the form with defaults or existing shift data
   const {
@@ -139,94 +157,44 @@ export default function ShiftForm({
     fetchRates();
   }, [watchEmployerId, setValue, shift, defaultRateId, watch]);
 
-  // Combine date and time into a single datetime string
-  const combineDateTime = (date: string, time: string): string => {
-    if (!date || !time) return '';
-    return `${date}T${time}`;
-  };
-
-  // Handler for date changes to clear errors when user fixes the input
-  const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setStartDate(value);
-
-    // Clear date error when user enters a valid date
-    if (value) {
-      setDateError(null);
-    } else {
-      setDateError('Date is required');
-    }
-  };
-
   // Form submission handler
   const onFormSubmit = handleSubmit(async (formData) => {
     try {
       setApiError(null);
-      clearErrors();
       setIsSubmitting(true);
 
-      // Validate required fields
-      let hasErrors = false;
+      // Validate inputs using the extracted utility
+      const isValid = validateDateTimeInputs(
+        startDate,
+        startTime,
+        endTime,
+        isOvernightShift,
+        setError,
+        clearErrors,
+        setDateError
+      );
 
-      if (!startDate) {
-        setDateError('Date is required');
-        hasErrors = true;
-      }
-
-      if (!startTime) {
-        setError('startTime', { message: 'Start time is required' });
-        hasErrors = true;
-      }
-
-      if (!endTime) {
-        setError('endTime', { message: 'End time is required' });
-        hasErrors = true;
-      }
-
-      if (hasErrors) {
+      if (!isValid) {
         setIsSubmitting(false);
         return;
       }
 
-      // Set the combined datetime values before submission
-      const data = {
-        ...formData,
-        startTime: combineDateTime(startDate, startTime),
-        endTime: combineDateTime(startDate, endTime),
-      };
+      // Process form data using the extracted utility
+      const processedData = processFormData(
+        formData,
+        startDate,
+        startTime,
+        endTime,
+        isOvernightShift
+      );
 
-      // Validate start time is before end time
-      if (startTime && endTime) {
-        // Simpler approach: Convert times to comparable numeric values
-        const [startHour, startMinute] = startTime.split(':').map((num) => parseInt(num, 10));
-        const [endHour, endMinute] = endTime.split(':').map((num) => parseInt(num, 10));
-
-        // Convert to minutes since midnight for easy comparison
-        const startTotalMinutes = startHour * 60 + startMinute;
-        const endTotalMinutes = endHour * 60 + endMinute;
-
-        // End time should be greater than start time
-        if (endTotalMinutes <= startTotalMinutes) {
-          setError('endTime', { message: 'End time must be after start time' });
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      await onSubmit(data);
+      await onSubmit(processedData);
     } catch (error: any) {
       setApiError(error.message || 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
   });
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (shift && onDelete) {
-      onDelete(shift._id);
-    }
-  };
 
   return (
     <form onSubmit={onFormSubmit} className="space-y-6">
@@ -238,51 +206,21 @@ export default function ShiftForm({
         <input type="hidden" {...register('employerId')} />
         <input type="hidden" {...register('rateId')} />
 
-        {/* Date Input */}
-        <DatePickerWheel
-          label="Shift Date"
-          id="shiftDate"
-          value={startDate}
-          onChange={(value) => {
-            setStartDate(value);
-            // Clear date error when user enters a valid date
-            if (value) {
-              setDateError(null);
-            } else {
-              setDateError('Date is required');
-            }
-          }}
-          error={!!dateError}
-          helperText={dateError || ''}
-          required
+        {/* Date and Time Fields Component */}
+        <ShiftFormDateTime
+          startDate={startDate}
+          setStartDate={setStartDate}
+          startTime={startTime}
+          setStartTime={setStartTime}
+          endTime={endTime}
+          setEndTime={setEndTime}
+          isOvernightShift={isOvernightShift}
+          setIsOvernightShift={setIsOvernightShift}
+          dateError={dateError}
+          setDateError={setDateError}
+          errors={errors}
+          clearErrors={clearErrors}
         />
-
-        {/* Time Inputs */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Start Time */}
-          <TimePickerWheel
-            label="Start Time"
-            id="startTime"
-            value={startTime}
-            onChange={(value) => setStartTime(value)}
-            error={!!errors.startTime}
-            helperText={errors.startTime ? 'Start time is required' : ''}
-            required
-          />
-
-          {/* End Time */}
-          <TimePickerWheel
-            label="End Time"
-            id="endTime"
-            value={endTime}
-            onChange={(value) => setEndTime(value)}
-            error={!!errors.endTime}
-            helperText={
-              errors.endTime ? errors.endTime.message?.toString() || 'End time is required' : ''
-            }
-            required
-          />
-        </div>
 
         {/* Notes */}
         <TextArea
@@ -294,33 +232,13 @@ export default function ShiftForm({
         />
 
         {/* Form action buttons */}
-        <div className="flex justify-end pt-4 mt-6 border-t border-gray-700/50">
-          {/* Right side buttons */}
-          <div className="flex space-x-3">
-            {/* Delete button - only show when editing an existing shift */}
-            {shift && onDelete && (
-              <Button
-                type="button"
-                onClick={handleDeleteClick}
-                variant="danger"
-                disabled={isSubmitting || externalIsSubmitting}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting || externalIsSubmitting}
-              isLoading={isSubmitting || externalIsSubmitting}
-            >
-              {!(isSubmitting || externalIsSubmitting) && <Check className="h-4 w-4 mr-2" />}
-              {shift ? 'Update' : 'Create'}
-            </Button>
-          </div>
-        </div>
+        <ShiftFormActions
+          shift={shift}
+          onDelete={onDelete}
+          onCancel={onCancel}
+          isSubmitting={isSubmitting}
+          externalIsSubmitting={externalIsSubmitting}
+        />
       </div>
     </form>
   );
