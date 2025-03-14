@@ -11,6 +11,13 @@ ShiftFlow is a user-friendly application designed to help individuals in Israel 
 
 **[Try ShiftFlow Live](https://shift-flow.vercel.app/)**
 
+### Test Account
+
+You can use the following dummy account for testing the live demo:
+
+- **Email**: test@gmail.com
+- **Password**: testuser
+
 ## 🚀 Features
 
 - **User Authentication** - Secure login and registration system
