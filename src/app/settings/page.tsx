@@ -18,7 +18,12 @@ interface Rate {
 }
 
 export default function Settings() {
-  const { defaultEmployerId, defaultRateId, isLoading, updateSettings } = useSettings();
+  const {
+    defaultEmployerId,
+    defaultRateId,
+    isLoading: settingsLoading,
+    updateSettings,
+  } = useSettings();
   const { employers, isLoading: loadingEmployers } = useEmployers();
   const [rates, setRates] = useState<Rate[]>([]);
   const [isRatesLoading, setIsRatesLoading] = useState(false);
@@ -27,77 +32,70 @@ export default function Settings() {
   const ratesCacheRef = useRef<{ [employerId: string]: Rate[] }>({});
   const hasFetchedRatesRef = useRef<{ [employerId: string]: boolean }>({});
 
-  // Track if initial loading has completed
-  const initialLoadCompletedRef = useRef(false);
+  // Simplified loading state management
+  const [isLoading, setIsLoading] = useState(true);
+  const initialLoadRef = useRef(true);
 
-  // Controlled loading state that ensures minimum display time
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const minLoadingTime = 1000; // 1 second
-
-  // Handle loading state with minimum display time - improved to prevent tab switching issues
+  // Handle loading state consistently with other pages
   useEffect(() => {
-    // Only show loading state on initial load
-    if ((isLoading || loadingEmployers) && !initialLoadCompletedRef.current) {
-      setIsPageLoading(true);
-
-      // When API loading is done
-      if (!isLoading && !loadingEmployers) {
-        const timer = setTimeout(() => {
-          setIsPageLoading(false);
-          initialLoadCompletedRef.current = true;
-        }, minLoadingTime);
-
-        return () => clearTimeout(timer);
-      }
-    } else if (!isLoading && !loadingEmployers && !initialLoadCompletedRef.current) {
-      // If loading finishes and we haven't marked initial load as complete
+    if (!settingsLoading && !loadingEmployers && initialLoadRef.current) {
       const timer = setTimeout(() => {
-        setIsPageLoading(false);
-        initialLoadCompletedRef.current = true;
-      }, minLoadingTime);
+        setIsLoading(false);
+        initialLoadRef.current = false;
+      }, 1000); // 1 second minimum loading time
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, loadingEmployers, minLoadingTime]);
+  }, [settingsLoading, loadingEmployers]);
 
-  // Memoized fetch rates function to prevent unnecessary re-renders
-  const fetchRates = useCallback(async (employerId: string) => {
-    if (!employerId) return;
+  // Fetch rates for an employer
+  const fetchRates = useCallback(
+    async (employerId: string) => {
+      try {
+        // Return cached rates if available
+        if (ratesCacheRef.current[employerId]) {
+          setRates(ratesCacheRef.current[employerId]);
+          return;
+        }
 
-    // If we already have rates for this employer, use cached data
-    if (hasFetchedRatesRef.current[employerId]) {
-      setRates(ratesCacheRef.current[employerId] || []);
-      return;
-    }
+        setIsRatesLoading(true);
 
-    try {
-      setIsRatesLoading(true);
-      const response = await fetch(`/api/rates?employerId=${employerId}`);
+        // Use existing flag to prevent duplicate fetches
+        if (hasFetchedRatesRef.current[employerId]) {
+          setIsRatesLoading(false);
+          return;
+        }
 
-      if (response.ok) {
+        const response = await fetch(`/api/rates?employerId=${employerId}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch rates');
+        }
+
         const data = await response.json();
-        setRates(data);
+        const fetchedRates: Rate[] = data;
 
-        // Cache the rates for this employer
-        ratesCacheRef.current[employerId] = data;
+        // Cache the rates
+        ratesCacheRef.current[employerId] = fetchedRates;
         hasFetchedRatesRef.current[employerId] = true;
+        setRates(fetchedRates);
+      } catch (error) {
+        logError('Settings:fetchRates', error);
+        showErrorToast('Failed to load rates');
+      } finally {
+        setIsRatesLoading(false);
       }
-    } catch (error) {
-      logError('Settings:FetchRates', error);
-      showErrorToast('Failed to fetch rates');
-    } finally {
-      setIsRatesLoading(false);
-    }
-  }, []);
+    },
+    [ratesCacheRef, hasFetchedRatesRef]
+  );
 
   // Fetch rates when employer changes
   useEffect(() => {
-    if (!defaultEmployerId) {
+    if (defaultEmployerId) {
+      fetchRates(defaultEmployerId);
+    } else {
       setRates([]);
-      return;
     }
-
-    fetchRates(defaultEmployerId);
   }, [defaultEmployerId, fetchRates]);
 
   // Handle employer change
@@ -107,20 +105,18 @@ export default function Settings() {
       if (!employerId) {
         // If they're clearing a previously set employer, that's a valid operation
         if (defaultEmployerId) {
-          await updateSettings({
-            defaultEmployerId: undefined,
-            defaultRateId: undefined,
-          });
-          showSuccessToast('Default employer cleared');
+          await updateSettings({ defaultEmployerId: undefined, defaultRateId: undefined });
+          showSuccessToast('Default employer and rate cleared');
         }
         return;
       }
 
-      await updateSettings({
-        defaultEmployerId: employerId,
-        defaultRateId: undefined, // Clear the rate when employer changes
-      });
+      // Update default employer, and clear default rate
+      await updateSettings({ defaultEmployerId: employerId, defaultRateId: undefined });
       showSuccessToast('Default employer updated successfully');
+
+      // Fetch rates for the new employer
+      fetchRates(employerId);
     } catch (error) {
       showErrorToast('Failed to update default employer');
     }
@@ -184,7 +180,7 @@ export default function Settings() {
                 className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-600 transition-all duration-200"
                 value={defaultEmployerId || ''}
                 onChange={(e) => handleEmployerChange(e.target.value)}
-                disabled={isLoading || loadingEmployers}
+                disabled={settingsLoading || loadingEmployers}
               >
                 <option value="" disabled={!!defaultEmployerId}>
                   -- Select an employer --
@@ -211,7 +207,7 @@ export default function Settings() {
                   className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-600 transition-all duration-200"
                   value={defaultRateId || ''}
                   onChange={(e) => handleRateChange(e.target.value)}
-                  disabled={isLoading || isRatesLoading}
+                  disabled={settingsLoading || isRatesLoading}
                 >
                   <option value="" disabled={!!defaultRateId}>
                     -- Select a rate --

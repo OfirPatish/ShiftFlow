@@ -1,99 +1,86 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { UserCircle, Mail, User, Calendar } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { UserCircle, Mail, User } from 'lucide-react';
 import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
 import Image from 'next/image';
 import PageLayout from '@/components/layout/templates/PageLayout';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/data-display/Card';
 
 export default function ProfileSettings() {
   const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
+  const initialLoadRef = useRef(true);
 
-  // Show loading spinner while session is loading
-  if (status === 'loading') {
+  // Handle loading state consistently with other pages
+  useEffect(() => {
+    if (status !== 'loading' && initialLoadRef.current) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        initialLoadRef.current = false;
+      }, 1000); // 1 second minimum loading time
+
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  // Show loading spinner while page is loading
+  if (isLoading) {
     return <FullPageSpinner />;
   }
 
-  // At this point, session is guaranteed to exist because the parent layout uses requireAuth()
   return (
-    <PageLayout
-      title="Profile Settings"
-      subtitle="Manage your personal information and account settings"
-      maxContentWidth="4xl"
-    >
-      <div className="bg-theme-light/90 backdrop-blur-sm rounded-xl border border-theme-border/50 shadow-xl overflow-hidden transition-all duration-300 hover:shadow-theme-accent/20">
-        {/* Profile Header */}
-        <div className="bg-gradient-to-r from-theme-accent/30 via-theme-accent/20 to-transparent p-10 flex flex-col md:flex-row items-center gap-8">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-theme-accent to-blue-500 rounded-full blur-xl opacity-30 group-hover:opacity-40 transition-opacity duration-500"></div>
-            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full flex items-center justify-center bg-theme-dark/80 border-4 border-theme-border/50 overflow-hidden shadow-lg relative z-10 group-hover:border-theme-accent/70 transition-all duration-300">
-              {session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Profile"
-                  width={144}
-                  height={144}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <UserCircle className="w-24 h-24 text-gray-400" />
-              )}
-            </div>
+    <PageLayout title="Profile Settings" subtitle="Your account information" maxContentWidth="4xl">
+      <Card className="border-l-4 border-primary-500">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary-400" />
+            <CardTitle>Profile Information</CardTitle>
           </div>
-          <div className="text-center md:text-left md:ml-2">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
-              {session?.user?.name || 'User'}
-            </h2>
-            <div className="flex items-center justify-center md:justify-start text-gray-300 bg-theme-dark/30 px-4 py-2 rounded-full backdrop-blur-sm shadow-inner inline-flex">
-              <Mail className="w-4 h-4 mr-3 text-theme-accent" />
-              <span className="text-sm">{session?.user?.email}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Personal Information */}
-        <div className="p-10">
-          <h3 className="text-xl font-semibold text-white mb-8 flex items-center border-b border-theme-border/40 pb-4">
-            <User className="w-5 h-5 mr-3 text-theme-accent" />
-            <span>Profile Information</span>
-          </h3>
-
-          <div className="space-y-6 transition-all duration-300">
-            <div className="bg-theme-dark/30 backdrop-blur-sm p-6 rounded-xl hover:bg-theme-dark/40 transition-all duration-300 border border-theme-border/30 hover:border-theme-border/50 shadow-md hover:shadow-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="bg-theme-accent/10 p-2 rounded-lg">
-                  <User className="w-5 h-5 text-theme-accent" />
-                </div>
-                <span className="font-medium text-white tracking-wide">Name</span>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="relative">
+              <div className="w-28 h-28 rounded-full flex items-center justify-center bg-gray-800/80 border-2 border-gray-700/40 overflow-hidden shadow-lg">
+                {session?.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt="Profile"
+                    width={128}
+                    height={128}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserCircle className="w-20 h-20 text-gray-400" />
+                )}
               </div>
-              <p className="text-gray-300 pl-10 mt-2 font-light">
-                {session?.user?.name || 'Not provided'}
-              </p>
             </div>
 
-            <div className="bg-theme-dark/30 backdrop-blur-sm p-6 rounded-xl hover:bg-theme-dark/40 transition-all duration-300 border border-theme-border/30 hover:border-theme-border/50 shadow-md hover:shadow-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="bg-theme-accent/10 p-2 rounded-lg">
-                  <Mail className="w-5 h-5 text-theme-accent" />
+            <div className="flex-1 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <div className="bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200">
+                  {session?.user?.name || 'User'}
                 </div>
-                <span className="font-medium text-white tracking-wide">Email Address</span>
               </div>
-              <p className="text-gray-300 pl-10 mt-2 font-light">
-                {session?.user?.email || 'Not provided'}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <div className="bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 flex items-center">
+                  <Mail className="w-4 h-4 mr-2 text-primary-400" />
+                  {session?.user?.email}
+                </div>
+              </div>
+
+              <p className="text-gray-400 text-sm mt-4">
+                Contact support for assistance with profile changes. We're currently working on
+                adding self-service profile management features.
               </p>
             </div>
           </div>
-
-          <div className="mt-10 text-sm text-gray-400 bg-theme-dark/20 backdrop-blur-sm p-5 rounded-xl border border-theme-border/30 shadow-inner">
-            <p className="flex items-center">
-              <Calendar className="w-4 h-4 mr-3 text-theme-accent/80" />
-              <span className="opacity-80">
-                This is all the information currently available in your profile.
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </PageLayout>
   );
 }
