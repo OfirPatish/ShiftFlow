@@ -14,7 +14,6 @@ interface RateFormProps {
   employerId?: string;
   onSubmit: (data: RateFormData) => Promise<void>;
   onDelete?: (rateId: string) => void;
-  onCancel?: () => void;
   isSubmitting?: boolean;
 }
 
@@ -23,7 +22,6 @@ export default function RateForm({
   employerId,
   onSubmit,
   onDelete,
-  onCancel,
   isSubmitting = false,
 }: RateFormProps) {
   const { employers, isLoading: loadingEmployers } = useEmployers();

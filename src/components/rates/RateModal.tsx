@@ -43,7 +43,6 @@ export default function RateModal({
         rate={rate}
         employerId={employerId}
         onSubmit={handleSubmit}
-        onCancel={onClose}
         onDelete={onDelete}
         isSubmitting={isSubmitting}
       />

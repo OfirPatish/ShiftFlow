@@ -40,7 +40,6 @@ export default function EmployerModal({
       <EmployerForm
         employer={employer}
         onSubmit={handleSubmit}
-        onCancel={onClose}
         onDelete={onDelete}
         isSubmitting={isSubmitting}
       />
