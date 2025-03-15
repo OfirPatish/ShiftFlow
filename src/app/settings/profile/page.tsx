@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { UserCircle, Mail, User, Shield } from 'lucide-react';
 import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
 import Image from 'next/image';
+import PageLayout from '@/components/layout/templates/PageLayout';
 
 export default function ProfileSettings() {
   const { data: session } = useSession();
@@ -48,9 +49,11 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6 text-white">Profile Settings</h1>
-
+    <PageLayout
+      title="Profile Settings"
+      subtitle="Manage your personal information and account settings"
+      maxContentWidth="4xl"
+    >
       <div className="bg-theme-light rounded-lg border border-theme-border shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
         {/* Profile Header */}
         <div className="bg-gradient-to-r from-theme-accent/30 to-theme-accent/10 p-6 flex flex-col md:flex-row items-center md:items-start">
@@ -136,6 +139,6 @@ export default function ProfileSettings() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

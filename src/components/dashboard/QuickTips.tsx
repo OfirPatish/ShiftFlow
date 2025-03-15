@@ -77,11 +77,7 @@ export default function QuickTips({ monthlyStats }: QuickTipsProps) {
         </button>
       </div>
 
-      {!isExpanded && (
-        <p className="text-gray-400 text-xs mt-3">
-          {insights[0].tip} <span className="text-blue-400">(click to view more)</span>
-        </p>
-      )}
+      {!isExpanded && <p className="text-gray-400 text-xs mt-3">{insights[0].tip}</p>}
 
       {isExpanded && (
         <div className="mt-3 space-y-3">

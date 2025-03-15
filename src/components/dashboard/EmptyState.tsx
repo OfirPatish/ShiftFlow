@@ -15,7 +15,8 @@ export default function EmptyState({ selectedMonth, onMonthChange }: EmptyStateP
     <PageLayout
       title="Dashboard"
       subtitle="Your shift tracking overview"
-      actionElement={<MonthSelector currentDate={safeDate} onChange={onMonthChange} />}
+      actionElement={null}
+      bottomAction={<MonthSelector currentDate={safeDate} onChange={onMonthChange} />}
     >
       <WelcomeTutorial />
     </PageLayout>

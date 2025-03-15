@@ -40,7 +40,7 @@ export default function StatsGrid({ monthlyStats, previousMonthStats }: StatsGri
     monthlyStats.shiftsCount > 0 ? monthlyStats.totalHours / monthlyStats.shiftsCount : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Monthly Income Card */}
       <div className="transition-all duration-300 hover:translate-y-[-4px] h-full">
         <StatsCard

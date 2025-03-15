@@ -9,6 +9,8 @@ import {
   TooltipProps,
 } from 'recharts';
 import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 // Tax bracket structure based on 2025 data for Israel - MONTHLY values (yearly values divided by 12)
 const TAX_BRACKETS_2025_MONTHLY = [
@@ -78,7 +80,7 @@ interface TaxBracketChartProps {
  * Tax bracket visualization component for Israeli income tax 2025 - Monthly Brackets
  */
 export default function TaxBracketChart({ monthlyIncome }: TaxBracketChartProps) {
-  // Use monthly income directly (no need to annualize)
+  const [isExpanded, setIsExpanded] = useState(false);
   const income = monthlyIncome || 0;
 
   // Calculate the current tax bracket based on monthly income
@@ -128,92 +130,110 @@ export default function TaxBracketChart({ monthlyIncome }: TaxBracketChartProps)
 
   return (
     <>
-      <div className="flex items-center justify-between pb-2 border-b border-gray-700/20">
+      <div
+        className="flex items-center justify-between cursor-pointer pb-2 border-b border-gray-700/20"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <h3 className="text-base font-medium text-gray-100">2025 Israel Tax Brackets (Monthly)</h3>
-        {income > 0 && (
-          <div className="text-xs text-gray-400">
-            Monthly Income:{' '}
-            <span className="text-white font-medium">
-              {getCurrencySymbol()}
-              {Math.round(income).toLocaleString()}
-            </span>
+        <button className="text-gray-400 hover:text-white">
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+      </div>
+
+      {!isExpanded && (
+        <p className="text-gray-400 text-xs mt-3">View tax brackets and rates for 2025.</p>
+      )}
+
+      {isExpanded && (
+        <>
+          {income > 0 && (
+            <div className="text-xs text-gray-400 mt-2">
+              Monthly Income:{' '}
+              <span className="text-white font-medium">
+                {getCurrencySymbol()}
+                {Math.round(income).toLocaleString()}
+              </span>
+            </div>
+          )}
+
+          <div className="mt-1 text-xs text-gray-400">
+            Progressive tax brackets shown with rates from 10% to 50%.
           </div>
-        )}
-      </div>
 
-      <div className="mt-1 text-xs text-gray-400">
-        Progressive tax brackets shown with rates from 10% to 50%.
-      </div>
-
-      <div className="mt-3" style={{ height: '200px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: 10, bottom: 40 }}
-            barGap={0}
-            barCategoryGap={2}
-          >
-            <XAxis
-              dataKey="label"
-              tick={{ fill: '#9CA3AF', fontSize: 11 }}
-              angle={-45}
-              textAnchor="end"
-              height={60}
-            />
-            <YAxis
-              tickFormatter={(value) => `${value}%`}
-              tick={{ fill: '#9CA3AF', fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 60]}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
-              {chartData.map((entry) => (
-                <Cell
-                  key={entry.bracket}
-                  fill={entry.color}
-                  fillOpacity={entry.isCurrentBracket ? 1 : 0.5}
-                  stroke={entry.isCurrentBracket ? '#FFFFFF' : 'none'}
-                  strokeWidth={entry.isCurrentBracket ? 1 : 0}
+          <div className="mt-3" style={{ height: '200px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 10, left: 10, bottom: 40 }}
+                barGap={0}
+                barCategoryGap={2}
+              >
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                 />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+                <YAxis
+                  tickFormatter={(value) => `${value}%`}
+                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  domain={[0, 60]}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={entry.bracket}
+                      fill={entry.color}
+                      fillOpacity={entry.isCurrentBracket ? 1 : 0.5}
+                      stroke={entry.isCurrentBracket ? '#FFFFFF' : 'none'}
+                      strokeWidth={entry.isCurrentBracket ? 1 : 0}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-      <div className="mt-3 text-xs text-gray-400 text-center">
-        <p>Tax rates apply to different portions of your income, not the entire amount.</p>
-        <p className="mt-1">
-          <a
-            href="https://www.gov.il/en/departments/israel_tax_authority"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300"
-          >
-            Source: Israel Tax Authority 2025 Rates (Monthly)
-          </a>
-        </p>
-        <div className="mt-3 p-2 border border-gray-700/20 rounded-md bg-gray-800/20">
-          <p className="font-medium mb-1">Important Disclaimer:</p>
-          <p>This chart only shows the basic tax brackets and does not account for:</p>
-          <ul className="list-disc list-inside mt-1 space-y-0.5">
-            <li>Credit points (נקודות זיכוי) which significantly reduce tax liability</li>
-            <li>Tax deductions (ניכויים) or tax credits (זיכויים)</li>
-            <li>
-              National Insurance (ביטוח לאומי) and Health Insurance (ביטוח בריאות) contributions
-            </li>
-            <li>Special tax rates for certain income types (passive income, investments, etc.)</li>
-            <li>Personal circumstances that may affect your tax liability</li>
-          </ul>
-          <p className="mt-2">
-            This visualization is for informational purposes only and should not be considered tax
-            advice. Please consult a certified tax professional for accurate tax calculations based
-            on your specific situation.
-          </p>
-        </div>
-      </div>
+          <div className="mt-3 text-xs text-gray-400 text-center">
+            <p>Tax rates apply to different portions of your income, not the entire amount.</p>
+            <p className="mt-1">
+              <a
+                href="https://www.gov.il/en/departments/israel_tax_authority"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300"
+              >
+                Source: Israel Tax Authority 2025 Rates (Monthly)
+              </a>
+            </p>
+
+            <div className="mt-3 p-2 border border-gray-700/20 rounded-md bg-gray-800/20">
+              <p className="font-medium mb-1">Important Disclaimer:</p>
+              <p>This chart only shows the basic tax brackets and does not account for:</p>
+              <ul className="list-disc list-inside mt-1 space-y-0.5">
+                <li>Credit points (נקודות זיכוי) which significantly reduce tax liability</li>
+                <li>Tax deductions (ניכויים) or tax credits (זיכויים)</li>
+                <li>
+                  National Insurance (ביטוח לאומי) and Health Insurance (ביטוח בריאות) contributions
+                </li>
+                <li>
+                  Special tax rates for certain income types (passive income, investments, etc.)
+                </li>
+                <li>Personal circumstances that may affect your tax liability</li>
+              </ul>
+              <p className="mt-2">
+                This visualization is for informational purposes only and should not be considered
+                tax advice. Please consult a certified tax professional for accurate tax
+                calculations based on your specific situation.
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

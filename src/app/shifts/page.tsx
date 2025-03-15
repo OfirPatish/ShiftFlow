@@ -7,6 +7,7 @@ import ShiftModal from '@/components/shifts/ShiftModal';
 import ConfirmDialog from '@/components/core/modals/ConfirmDialog';
 import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
 import PageLayout from '@/components/layout/templates/PageLayout';
+import { Button } from '@/components/ui/buttons/Button';
 
 export default function Shifts() {
   const {
@@ -37,16 +38,16 @@ export default function Shifts() {
       subtitle="Track and manage your work shifts"
       maxContentWidth="4xl"
       actionElement={
-        <div className="flex items-center gap-4">
-          <MonthSelector currentDate={selectedMonth} onChange={handleMonthChange} />
-          <button
-            onClick={handleAddShift}
-            className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
-          >
-            Add Shift
-          </button>
-        </div>
+        <Button
+          onClick={handleAddShift}
+          variant="primary"
+          className="relative group px-6 py-2 h-10 sm:h-11"
+        >
+          <span className="absolute inset-0 bg-gradient-to-r from-primary-600/50 to-primary-500/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
+          <span className="relative">Add Shift</span>
+        </Button>
       }
+      bottomAction={<MonthSelector currentDate={selectedMonth} onChange={handleMonthChange} />}
     >
       {/* Content Section */}
       <div className="p-0">

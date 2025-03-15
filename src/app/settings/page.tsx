@@ -8,6 +8,7 @@ import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/data-display/Card';
 import { Building2 } from 'lucide-react';
 import { logError } from '@/lib/validation/errorHandlers';
+import PageLayout from '@/components/layout/templates/PageLayout';
 
 interface Rate {
   _id: string;
@@ -146,108 +147,101 @@ export default function Settings() {
   };
 
   // Show loading state
-  if (isPageLoading) {
+  if (isLoading) {
     return <FullPageSpinner />;
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-16 xl:px-24 py-4 sm:py-8">
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-100 mb-1">Settings</h1>
-            <p className="text-gray-400 text-sm">Customize your application preferences</p>
+    <PageLayout
+      title="Settings"
+      subtitle="Customize your application preferences"
+      maxContentWidth="4xl"
+    >
+      <Card className="border-l-4 border-primary-500">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary-400" />
+            <CardTitle>Default Shift Settings</CardTitle>
           </div>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-400 mb-6 text-sm">
+            Set your default employer and pay rate for new shifts. This saves you time when creating
+            new shifts by automatically selecting these values.
+          </p>
 
-      <div className="grid grid-cols-1 gap-6">
-        <Card className="border-l-4 border-primary-500">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary-400" />
-              <CardTitle>Default Shift Settings</CardTitle>
+          <div className="space-y-6">
+            {/* Default Employer Selector */}
+            <div>
+              <label
+                htmlFor="defaultEmployer"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Default Employer
+              </label>
+              <select
+                id="defaultEmployer"
+                className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-600 transition-all duration-200"
+                value={defaultEmployerId || ''}
+                onChange={(e) => handleEmployerChange(e.target.value)}
+                disabled={isLoading || loadingEmployers}
+              >
+                <option value="" disabled={!!defaultEmployerId}>
+                  -- Select an employer --
+                </option>
+                {employers.map((employer) => (
+                  <option key={employer._id} value={employer._id}>
+                    {employer.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-400 mb-6 text-sm">
-              Set your default employer and pay rate for new shifts. This saves you time when
-              creating new shifts by automatically selecting these values.
-            </p>
 
-            <div className="space-y-6">
-              {/* Default Employer Selector */}
+            {/* Default Rate Selector - Only show if employer is selected */}
+            {defaultEmployerId && (
               <div>
                 <label
-                  htmlFor="defaultEmployer"
+                  htmlFor="defaultRate"
                   className="block text-sm font-medium text-gray-300 mb-2"
                 >
-                  Default Employer
+                  Default Pay Rate
                 </label>
                 <select
-                  id="defaultEmployer"
+                  id="defaultRate"
                   className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-600 transition-all duration-200"
-                  value={defaultEmployerId || ''}
-                  onChange={(e) => handleEmployerChange(e.target.value)}
-                  disabled={isLoading || loadingEmployers}
+                  value={defaultRateId || ''}
+                  onChange={(e) => handleRateChange(e.target.value)}
+                  disabled={isLoading || isRatesLoading}
                 >
-                  <option value="" disabled={!!defaultEmployerId}>
-                    -- Select an employer --
+                  <option value="" disabled={!!defaultRateId}>
+                    -- Select a rate --
                   </option>
-                  {employers.map((employer) => (
-                    <option key={employer._id} value={employer._id}>
-                      {employer.name}
+                  {rates.map((rate) => (
+                    <option key={rate._id} value={rate._id}>
+                      {rate.name} (
+                      {new Intl.NumberFormat('he-IL', {
+                        style: 'decimal',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(rate.baseRate)}{' '}
+                      {rate.currency})
                     </option>
                   ))}
                 </select>
+                {isRatesLoading && <p className="mt-2 text-sm text-gray-400">Loading rates...</p>}
+                {!isRatesLoading && rates.length === 0 && (
+                  <p className="mt-2 text-sm text-gray-400">
+                    No rates found for this employer.{' '}
+                    <a href="/rates" className="text-primary-400 hover:underline">
+                      Create a rate
+                    </a>
+                  </p>
+                )}
               </div>
-
-              {/* Default Rate Selector - Only show if employer is selected */}
-              {defaultEmployerId && (
-                <div>
-                  <label
-                    htmlFor="defaultRate"
-                    className="block text-sm font-medium text-gray-300 mb-2"
-                  >
-                    Default Pay Rate
-                  </label>
-                  <select
-                    id="defaultRate"
-                    className="w-full bg-gray-800/80 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-600 transition-all duration-200"
-                    value={defaultRateId || ''}
-                    onChange={(e) => handleRateChange(e.target.value)}
-                    disabled={isLoading || isRatesLoading}
-                  >
-                    <option value="" disabled={!!defaultRateId}>
-                      -- Select a rate --
-                    </option>
-                    {rates.map((rate) => (
-                      <option key={rate._id} value={rate._id}>
-                        {rate.name} (
-                        {new Intl.NumberFormat('he-IL', {
-                          style: 'decimal',
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }).format(rate.baseRate)}{' '}
-                        {rate.currency})
-                      </option>
-                    ))}
-                  </select>
-                  {isRatesLoading && <p className="mt-2 text-sm text-gray-400">Loading rates...</p>}
-                  {!isRatesLoading && rates.length === 0 && (
-                    <p className="mt-2 text-sm text-gray-400">
-                      No rates found for this employer.{' '}
-                      <a href="/rates" className="text-primary-400 hover:underline">
-                        Create a rate
-                      </a>
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </PageLayout>
   );
 }
