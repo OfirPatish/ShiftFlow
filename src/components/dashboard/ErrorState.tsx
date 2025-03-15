@@ -2,14 +2,14 @@ import { startOfMonth, endOfMonth } from 'date-fns';
 
 interface ErrorStateProps {
   selectedMonth: Date;
-  onRetry: (startDate: Date, endDate: Date) => void;
+  onRetry: (dates: { start: Date; end: Date }) => void;
 }
 
 export default function ErrorState({ selectedMonth, onRetry }: ErrorStateProps) {
   const handleRetry = () => {
-    const currentMonthStart = startOfMonth(selectedMonth);
-    const currentMonthEnd = endOfMonth(selectedMonth);
-    onRetry(currentMonthStart, currentMonthEnd);
+    const start = startOfMonth(selectedMonth);
+    const end = endOfMonth(selectedMonth);
+    onRetry({ start, end });
   };
 
   return (

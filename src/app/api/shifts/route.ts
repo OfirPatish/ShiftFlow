@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
-import Shift from '@/models/Shift';
-import { authOptions } from '@/lib/authConfig';
+import { connectToDatabase, preloadModels } from '@/lib/api/databaseConnection';
+import Shift from '@/schemas/Shift';
+import { authOptions } from '@/lib/api/authConfig';
 import mongoose from 'mongoose';
-import { calculateShiftEarnings } from '@/lib/shiftCalculator';
-import Rate from '@/models/Rate';
-import { errorResponse, withErrorHandling } from '@/lib/apiResponses';
+import { calculateShiftEarnings } from '@/lib/utils/shiftCalculator';
+import Rate from '@/schemas/Rate';
+import { errorResponse, withErrorHandling } from '@/lib/api/apiResponses';
 
 // GET /api/shifts - Get all shifts for the current user
 export const GET = withErrorHandling(async (req: NextRequest) => {

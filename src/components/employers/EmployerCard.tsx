@@ -1,23 +1,15 @@
 'use client';
 
-import { Employer } from '@/types/employers';
+import { Employer } from '@/types/models/employers';
 import { MoreVertical } from 'lucide-react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-  CardItem,
-} from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/data-display/Card';
 
 interface EmployerCardProps {
   employer: Employer;
   onEdit: (employer: Employer) => void;
-  onDelete: (employerId: string) => void;
 }
 
-export default function EmployerCard({ employer, onEdit, onDelete }: EmployerCardProps) {
+export default function EmployerCard({ employer, onEdit }: EmployerCardProps) {
   const handleEditClick = () => {
     onEdit(employer);
   };
@@ -29,7 +21,7 @@ export default function EmployerCard({ employer, onEdit, onDelete }: EmployerCar
 
         <div
           onClick={handleEditClick}
-          className="cursor-pointer flex items-center justify-center"
+          className="cursor-pointer flex items-center justify-center hover:bg-gray-800/50 p-1 rounded-md"
           aria-label="Edit employer"
         >
           <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors" />

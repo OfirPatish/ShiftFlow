@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authConfig';
-import { connectToDatabase } from '@/lib/databaseConnection';
-import UserSettings from '@/models/UserSettings';
+import { authOptions } from '@/lib/api/authConfig';
+import { connectToDatabase } from '@/lib/api/databaseConnection';
+import UserSettings from '@/schemas/UserSettings';
 
 // GET /api/settings - Get user settings
 export async function GET() {

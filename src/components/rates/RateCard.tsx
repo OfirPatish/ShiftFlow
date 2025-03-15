@@ -1,17 +1,16 @@
 import { format } from 'date-fns';
-import { Rate } from '@/types/rates';
-import { MoreVertical, DollarSign } from 'lucide-react';
-import { useEmployers } from '@/hooks/useEmployers';
-import { Card, CardHeader, CardContent } from '@/components/ui/Card';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
+import { Rate } from '@/types/models/rates';
+import { MoreVertical } from 'lucide-react';
+import { useEmployers } from '@/hooks/api/useEmployers';
+import { Card, CardHeader, CardContent } from '@/components/ui/data-display/Card';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
 
 interface RateCardProps {
   rate: Rate;
   onEdit: (rate: Rate) => void;
-  onDelete: (rateId: string) => void;
 }
 
-export default function RateCard({ rate, onEdit, onDelete }: RateCardProps) {
+export default function RateCard({ rate, onEdit }: RateCardProps) {
   const { employers } = useEmployers();
 
   // Find the employer for this rate
@@ -40,7 +39,7 @@ export default function RateCard({ rate, onEdit, onDelete }: RateCardProps) {
           {/* Menu button */}
           <div
             onClick={handleEditClick}
-            className="cursor-pointer flex items-center"
+            className="cursor-pointer flex items-center justify-center hover:bg-gray-800/50 p-1 rounded-md"
             aria-label="Edit rate"
           >
             <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors" />

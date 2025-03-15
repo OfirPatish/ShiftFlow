@@ -1,40 +1,25 @@
 'use client';
 
-import React from 'react';
 import { useState, useEffect } from 'react';
-import { EmployerFormData, Employer } from '@/types/employers';
+import { EmployerFormData, Employer } from '@/types/models/employers';
 import { Check, Trash2, Building2, MapPin, Palette } from 'lucide-react';
-import { FormInput } from '@/components/ui/FormInput';
-import { ColorPicker } from '@/components/ui/ColorPicker';
-import { Button } from '@/components/ui/Button';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ColorPicker } from '@/components/ui/forms/ColorPicker';
+import { Button } from '@/components/ui/buttons/Button';
+import LoadingSpinner from '@/components/core/feedback/LoadingSpinner';
+import { logError } from '@/lib/validation/errorHandlers';
 
 interface EmployerFormProps {
   employer?: Employer;
   onSubmit: (data: EmployerFormData) => Promise<void>;
-  onCancel: () => void;
   onDelete?: (employerId: string) => void;
-  isSubmitting: boolean;
+  isSubmitting?: boolean;
 }
-
-// Predefined color options
-const colorOptions = [
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Green', value: '#10B981' },
-  { name: 'Purple', value: '#8B5CF6' },
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Amber', value: '#F59E0B' },
-  { name: 'Pink', value: '#EC4899' },
-  { name: 'Indigo', value: '#6366F1' },
-  { name: 'Teal', value: '#14B8A6' },
-];
 
 export default function EmployerForm({
   employer,
   onSubmit,
-  onCancel,
   onDelete,
-  isSubmitting,
+  isSubmitting = false,
 }: EmployerFormProps) {
   const [formData, setFormData] = useState<EmployerFormData>({
     name: '',

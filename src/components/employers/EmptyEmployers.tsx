@@ -1,4 +1,4 @@
-import EmptyState from '@/components/common/EmptyState';
+import EmptyState from '@/components/core/feedback/EmptyState';
 
 interface EmptyEmployersProps {
   onAddAction?: () => void;

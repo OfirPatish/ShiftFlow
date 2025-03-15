@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { DatePickerWheel } from '@/components/ui/DatePickerWheel';
-import { TimePickerWheel } from '@/components/ui/TimePickerWheel';
-import { UseFormClearErrors } from 'react-hook-form';
-import { ShiftFormData } from '@/types/shifts';
-import { startOfDay, endOfDay } from 'date-fns';
+import React, { useEffect } from 'react';
+import { DatePicker } from '@/components/ui/forms/DatePicker';
+import { TimePicker } from '@/components/ui/forms/TimePicker';
+import { UseFormClearErrors, FieldErrors } from 'react-hook-form';
+import { ShiftFormData } from '@/types/models/shifts';
 
 interface ShiftFormDateTimeProps {
   startDate: string;
@@ -14,7 +13,7 @@ interface ShiftFormDateTimeProps {
   setEndTime: (value: string) => void;
   dateError: string | null;
   setDateError: (error: string | null) => void;
-  errors: any;
+  errors: FieldErrors<ShiftFormData>;
   clearErrors: UseFormClearErrors<ShiftFormData>;
   isEditMode: boolean;
 }
@@ -32,69 +31,21 @@ export const ShiftFormDateTime: React.FC<ShiftFormDateTimeProps> = ({
   clearErrors,
   isEditMode,
 }) => {
-  const [dateWarning, setDateWarning] = useState<string | null>(null);
-  const warningRef = useRef<HTMLInputElement>(null);
-
-  // Check if a shift already exists on the selected date
+  // Clear errors in edit mode
   useEffect(() => {
-    // Skip this check if we're in edit mode
     if (isEditMode) {
-      setDateWarning(null);
-      setDateError(null); // Also clear any date errors when in edit mode
-      return;
+      setDateError(null);
     }
-
-    const checkExistingShifts = async () => {
-      if (!startDate) return;
-
-      // Convert the date string to a Date object
-      const date = new Date(startDate);
-      if (isNaN(date.getTime())) return;
-
-      // Create start and end of day for the selected date
-      const dayStart = startOfDay(date);
-      const dayEnd = endOfDay(date);
-
-      try {
-        // Build URL with query parameters
-        const params = new URLSearchParams();
-        params.append('startDate', dayStart.toISOString());
-        params.append('endDate', dayEnd.toISOString());
-
-        const response = await fetch(`/api/shifts?${params.toString()}`);
-
-        if (response.ok) {
-          const shifts = await response.json();
-
-          if (Array.isArray(shifts) && shifts.length > 0) {
-            const warning =
-              'You already have a shift on this day. Only one shift per day is allowed.';
-            setDateWarning(warning);
-            setDateError(warning); // Immediately set the error to prevent form submission
-          } else {
-            setDateWarning(null);
-            // Only clear the error if it was related to an existing shift
-            if (dateError && dateError.includes('already have a shift on this day')) {
-              setDateError(null);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error checking for existing shifts:', error);
-      }
-    };
-
-    checkExistingShifts();
-  }, [startDate, isEditMode, dateError, setDateError]);
+  }, [isEditMode, setDateError]);
 
   return (
     <>
       {/* Date Input */}
-      <DatePickerWheel
+      <DatePicker
         label="Shift Date"
         id="shiftDate"
         value={startDate}
-        onChange={(value) => {
+        onChange={(value: string) => {
           setStartDate(value);
           // Clear date error when user enters a valid date
           if (value) {
@@ -103,19 +54,19 @@ export const ShiftFormDateTime: React.FC<ShiftFormDateTimeProps> = ({
             setDateError('Date is required');
           }
         }}
-        error={!!dateError || !!dateWarning}
-        helperText={dateError || dateWarning || ''}
+        error={!!dateError}
+        helperText={dateError || ''}
         required
       />
 
       {/* Time Inputs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Start Time */}
-        <TimePickerWheel
+        <TimePicker
           label="Start Time"
           id="startTime"
           value={startTime}
-          onChange={(value) => {
+          onChange={(value: string) => {
             setStartTime(value);
             // Clear any time-related errors when user updates the time
             clearErrors('startTime');
@@ -127,11 +78,11 @@ export const ShiftFormDateTime: React.FC<ShiftFormDateTimeProps> = ({
         />
 
         {/* End Time */}
-        <TimePickerWheel
+        <TimePicker
           label="End Time"
           id="endTime"
           value={endTime}
-          onChange={(value) => {
+          onChange={(value: string) => {
             setEndTime(value);
             // Clear any time-related errors when user updates the time
             clearErrors('endTime');

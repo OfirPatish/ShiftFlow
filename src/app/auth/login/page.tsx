@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useLogin } from '@/hooks/useLogin';
+import { useLogin } from '@/hooks/ui/useLogin';
 import {
   FormField,
   Checkbox,

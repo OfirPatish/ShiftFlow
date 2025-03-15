@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/databaseConnection';
-import Employer from '@/models/Employer';
-import Shift from '@/models/Shift';
-import Rate from '@/models/Rate';
+import { connectToDatabase } from '@/lib/api/databaseConnection';
+import Employer from '@/schemas/Employer';
+import Shift from '@/schemas/Shift';
+import Rate from '@/schemas/Rate';
 import mongoose from 'mongoose';
-import { authOptions } from '@/lib/authConfig';
+import { authOptions } from '@/lib/api/authConfig';
 import { getServerSession } from 'next-auth';
+import { errorResponse } from '@/lib/api/apiResponses';
 
 // Helper for authentication and employer retrieval
 async function getAuthorizedEmployer(req: NextRequest, params: { id: string }) {
@@ -46,8 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(result.employer);
   } catch (error) {
-    console.error('Error fetching employer:', error);
-    return NextResponse.json({ error: 'Failed to fetch employer' }, { status: 500 });
+    return errorResponse('Failed to fetch employer', 500, error);
   }
 }
 
@@ -91,12 +91,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     return NextResponse.json(employer);
   } catch (error) {
-    console.error('Error updating employer:', error);
-    return NextResponse.json({ error: 'Failed to update employer' }, { status: 500 });
+    return errorResponse('Failed to update employer', 500, error);
   }
 }
 
-// DELETE /api/employers/[id] - Delete a specific employer (soft delete)
+// DELETE /api/employers/[id] - Delete a specific employer
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const result = await getAuthorizedEmployer(req, params);
@@ -116,7 +115,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (shiftsCount > 0) {
       return NextResponse.json(
         {
-          error: 'Cannot delete employer with active shifts',
+          error: 'Cannot delete employer with active shifts. Please delete the shifts first.',
         },
         { status: 400 }
       );
@@ -131,19 +130,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (ratesCount > 0) {
       return NextResponse.json(
         {
-          error: 'Cannot delete employer with active pay rates',
+          error: 'Cannot delete employer with active pay rates. Please delete the rates first.',
         },
         { status: 400 }
       );
     }
 
-    // Soft delete by marking as inactive
-    employer.isActive = false;
-    await employer.save();
+    // Perform hard delete
+    await Employer.deleteOne({ _id: employer._id });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting employer:', error);
-    return NextResponse.json({ error: 'Failed to delete employer' }, { status: 500 });
+    return errorResponse('Failed to delete employer', 500, error);
   }
 }

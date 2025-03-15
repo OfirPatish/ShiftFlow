@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
-import Employer from '@/models/Employer';
-import { authOptions } from '@/lib/authConfig';
+import { connectToDatabase, preloadModels } from '@/lib/api/databaseConnection';
+import Employer from '@/schemas/Employer';
+import { authOptions } from '@/lib/api/authConfig';
 
 // GET /api/employers - Get all employers for the current user
 export async function GET() {

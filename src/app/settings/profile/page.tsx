@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { UserCircle, Mail, User, Shield } from 'lucide-react';
-import { FullPageSpinner } from '@/components/common/LoadingSpinner';
+import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
+import Image from 'next/image';
 
 export default function ProfileSettings() {
   const { data: session } = useSession();
@@ -56,9 +57,11 @@ export default function ProfileSettings() {
           <div className="relative mb-4 md:mb-0">
             <div className="w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center bg-theme-dark border-2 border-theme-border overflow-hidden shadow-lg transition-all duration-300 hover:border-theme-accent">
               {session.user?.image ? (
-                <img
+                <Image
                   src={session.user.image}
                   alt="Profile"
+                  width={112}
+                  height={112}
                   className="w-full h-full object-cover"
                 />
               ) : (

@@ -1,13 +1,12 @@
-import { Shift } from '@/types/shifts';
+import { Shift } from '@/types/models/shifts';
 import { Clock, MoreHorizontal, Calendar } from 'lucide-react';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
 
 interface DesktopShiftCardProps {
   shift: Shift;
   onClick: (shift: Shift) => void;
   fullDateDisplay: string;
   timeRange: string;
-  hourlyRateDisplay: string;
   earningsAmount: string;
   hasOvertime: boolean;
 }
@@ -17,7 +16,6 @@ export function DesktopShiftCard({
   onClick,
   fullDateDisplay,
   timeRange,
-  hourlyRateDisplay,
   earningsAmount,
   hasOvertime,
 }: DesktopShiftCardProps) {

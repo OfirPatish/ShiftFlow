@@ -1,6 +1,6 @@
 import StatsCard from './StatsCard';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
-import { MonthlyStats } from '@/types/dashboard';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
+import { MonthlyStats } from '@/types/ui/dashboard';
 
 interface StatsGridProps {
   monthlyStats: MonthlyStats;

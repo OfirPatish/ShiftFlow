@@ -1,10 +1,10 @@
 'use client';
 
-import { SessionProvider, useSession, signOut } from 'next-auth/react';
+import { SessionProvider, useSession, signOut, SignOutResponse } from 'next-auth/react';
 import { ReactNode, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { logError } from '@/lib/errorHandlers';
+import { logError } from '@/lib/validation/errorHandlers';
 
 interface AuthContextProps {
   children: ReactNode;
@@ -98,7 +98,7 @@ export const broadcastSignOut = (options?: Parameters<typeof signOut>[0]) => {
   }
 
   // Delay the sign out to ensure the localStorage event is propagated first
-  return new Promise<any>((resolve) => {
+  return new Promise<SignOutResponse | undefined>((resolve) => {
     setTimeout(() => {
       signOut({
         ...options,

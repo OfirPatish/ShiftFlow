@@ -1,12 +1,11 @@
 import React from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/buttons/Button';
 import { Check, Trash2 } from 'lucide-react';
-import { Shift } from '@/types/shifts';
+import { Shift } from '@/types/models/shifts';
 
 interface ShiftFormActionsProps {
   shift?: Shift;
   onDelete?: (shiftId: string) => void;
-  onCancel?: () => void;
   isSubmitting: boolean;
   externalIsSubmitting: boolean;
 }

@@ -3,11 +3,11 @@
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { FullPageSpinner } from '@/components/common/LoadingSpinner';
-import { useShifts } from '@/hooks/useShifts';
-import { showErrorToast } from '@/lib/notificationToasts';
-import { calculateMonthlyTotals } from '@/lib/shiftCalculator';
-import { MonthlyStats } from '@/types/dashboard';
+import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
+import { useShifts } from '@/hooks/api/useShifts';
+import { showErrorToast } from '@/lib/utils/notificationToasts';
+import { calculateMonthlyTotals } from '@/lib/utils/shiftCalculator';
+import { MonthlyStats } from '@/types/ui/dashboard';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import EmptyState from '@/components/dashboard/EmptyState';
 import ErrorState from '@/components/dashboard/ErrorState';
@@ -194,14 +194,15 @@ export default function Dashboard() {
   }, [shifts]);
 
   // Handle month change
-  const handleMonthChange = (startDate: Date, endDate: Date, currentMonth: Date) => {
-    setSelectedMonth(currentMonth);
+  const handleMonthChange = (dates: { start: Date; end: Date; current: Date }) => {
+    setSelectedMonth(dates.current);
+    fetchShifts({ startDate: dates.start, endDate: dates.end });
   };
 
   // Handle retry on error
-  const handleRetry = (startDate: Date, endDate: Date) => {
+  const handleRetry = (dates: { start: Date; end: Date }) => {
     setFetchError(null);
-    fetchShifts({ startDate, endDate });
+    fetchShifts({ startDate: dates.start, endDate: dates.end });
   };
 
   // Dashboard render logic with clear conditions
@@ -220,7 +221,6 @@ export default function Dashboard() {
   // Dashboard content
   return (
     <DashboardContent
-      shifts={shifts}
       monthlyStats={monthlyStats}
       previousMonthStats={previousMonthStats}
       selectedMonth={selectedMonth}

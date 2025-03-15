@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSettings } from '@/hooks/useSettings';
-import { useEmployers } from '@/hooks/useEmployers';
-import { showSuccessToast, showErrorToast } from '@/lib/notificationToasts';
-import LoadingSpinner, { FullPageSpinner } from '@/components/common/LoadingSpinner';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { useSettings } from '@/hooks/api/useSettings';
+import { useEmployers } from '@/hooks/api/useEmployers';
+import { showSuccessToast, showErrorToast } from '@/lib/utils/notificationToasts';
+import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/data-display/Card';
 import { Building2 } from 'lucide-react';
+import { logError } from '@/lib/validation/errorHandlers';
 
 interface Rate {
   _id: string;
@@ -81,7 +82,8 @@ export default function Settings() {
         hasFetchedRatesRef.current[employerId] = true;
       }
     } catch (error) {
-      console.error('Error fetching rates:', error);
+      logError('Settings:FetchRates', error);
+      showErrorToast('Failed to fetch rates');
     } finally {
       setIsRatesLoading(false);
     }

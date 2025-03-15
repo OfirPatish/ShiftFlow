@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { ReactNode } from 'react';
-import { broadcastSignOut } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;

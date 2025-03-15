@@ -1,8 +1,8 @@
-import { Shift } from '@/types/shifts';
+import { Shift } from '@/types/models/shifts';
 import { MobileShiftCard } from './MobileShiftCard';
 import { DesktopShiftCard } from './DesktopShiftCard';
-import { formatCurrency, formatWithLeftSymbol } from '@/lib/currencyFormatter';
-import { formatDayDate, formatFullDate, formatTimeRange } from '@/lib/dateFormatter';
+import { formatCurrency } from '@/lib/utils/currencyFormatter';
+import { formatDayDate, formatFullDate, formatTimeRange } from '@/lib/utils/dateFormatter';
 
 interface ShiftCardProps {
   shift: Shift;
@@ -21,10 +21,6 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
   // Format time range
   const timeRange = formatTimeRange(startDate, endDate);
 
-  // Format hourly rate if available
-  const rate = typeof shift.rateId === 'object' ? shift.rateId : null;
-  const hourlyRateDisplay = rate ? formatWithLeftSymbol(rate.baseRate) : 'N/A';
-
   // Format earnings for display - without currency symbol
   const earningsAmount = formatCurrency(shift.totalEarnings);
 
@@ -35,9 +31,8 @@ export function ShiftCard({ shift, onClick, isMobile }: ShiftCardProps) {
     shift,
     onClick,
     dayDateDisplay,
-    fullDateDisplay: dayDateDisplay, // Use same format for both views
+    fullDateDisplay: formatFullDate(startDate),
     timeRange,
-    hourlyRateDisplay,
     earningsAmount,
     hasOvertime,
   };

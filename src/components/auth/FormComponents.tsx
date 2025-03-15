@@ -7,7 +7,7 @@ interface FormFieldProps {
   label?: string;
   type?: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
   placeholder?: string;
   required?: boolean;
   inputRef?: React.RefObject<HTMLInputElement> | null;
@@ -60,42 +60,33 @@ export const FormField: React.FC<FormFieldProps> = ({
 interface CheckboxProps {
   id: string;
   checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
   label: string;
 }
 
 // Custom checkbox component
 export const Checkbox: React.FC<CheckboxProps> = ({ id, checked, onChange, label }) => (
-  <div className="flex items-center">
+  <label htmlFor={id} className="flex items-center cursor-pointer select-none">
     <div className="relative inline-block h-4 w-4">
       <input
-        id={id}
-        name={id}
         type="checkbox"
+        id={id}
         checked={checked}
         onChange={onChange}
-        className="h-4 w-4 opacity-0 absolute z-10 cursor-pointer"
+        className="absolute opacity-0 w-full h-full cursor-pointer z-10"
       />
       <div
-        className={`absolute top-0 left-0 h-4 w-4 border ${
-          checked ? 'bg-primary border-primary' : 'bg-gray-800 border-gray-600'
-        } rounded transition-all duration-150`}
+        className={`absolute inset-0 rounded border transition-colors duration-200 ${
+          checked ? 'bg-primary border-primary' : 'border-gray-600 hover:border-gray-500'
+        }`}
       >
         {checked && (
-          <svg className="h-4 w-4 text-white p-[1px]" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <CheckCircle2 className="w-3 h-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         )}
       </div>
     </div>
-    <label htmlFor={id} className="ml-2 block text-sm text-gray-300 cursor-pointer">
-      {label}
-    </label>
-  </div>
+    <span className="ml-2 text-sm text-gray-300">{label}</span>
+  </label>
 );
 
 // Password visibility toggle button component

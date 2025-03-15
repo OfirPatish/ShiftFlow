@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase, preloadModels } from '@/lib/databaseConnection';
-import Shift from '@/models/Shift';
-import { authOptions } from '@/lib/authConfig';
+import { connectToDatabase, preloadModels } from '@/lib/api/databaseConnection';
+import Shift from '@/schemas/Shift';
+import { authOptions } from '@/lib/api/authConfig';
 import mongoose from 'mongoose';
-import { calculateShiftEarnings } from '@/lib/shiftCalculator';
-import Rate from '@/models/Rate';
-import { errorResponse, withErrorHandling } from '@/lib/apiResponses';
+import { calculateShiftEarnings } from '@/lib/utils/shiftCalculator';
+import Rate from '@/schemas/Rate';
+import { errorResponse, withErrorHandling } from '@/lib/api/apiResponses';
+import { logError } from '@/lib/validation/errorHandlers';
 
 // Helper function to get a shift by ID and verify ownership
 async function getAuthorizedShift(req: NextRequest, params: { id: string }) {
@@ -38,7 +39,7 @@ async function getAuthorizedShift(req: NextRequest, params: { id: string }) {
 
     return { shift, user: session.user };
   } catch (error) {
-    console.error('Error in getAuthorizedShift:', error);
+    logError('Shifts:Auth', error);
     return { error: 'Server error', status: 500 };
   }
 }
@@ -60,12 +61,12 @@ export const GET = withErrorHandling(
 );
 
 // PATCH /api/shifts/[id] - Update a specific shift
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const PATCH = withErrorHandling(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
     const result = await getAuthorizedShift(req, params);
 
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return errorResponse(result.error as string, result.status);
     }
 
     const data = await req.json();
@@ -89,7 +90,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     // Validate that start time is before end time
     if (shift.startTime >= shift.endTime) {
-      return NextResponse.json({ error: 'Start time must be before end time' }, { status: 400 });
+      return errorResponse('Start time must be before end time', 400);
     }
 
     if (data.breakDuration !== undefined) shift.breakDuration = data.breakDuration;
@@ -98,7 +99,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Fetch the rate to get the base rate
     const rate = await Rate.findById(shift.rateId);
     if (!rate) {
-      return NextResponse.json({ error: 'Invalid rate ID' }, { status: 400 });
+      return errorResponse('Invalid rate ID', 400);
     }
 
     // Recalculate shift earnings with fixed multipliers
@@ -127,26 +128,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     await shift.populate('rateId', 'baseRate currency');
 
     return NextResponse.json(shift);
-  } catch (error) {
-    console.error('Error updating shift:', error);
-    return NextResponse.json({ error: 'Failed to update shift' }, { status: 500 });
   }
-}
+);
 
 // DELETE /api/shifts/[id] - Delete a specific shift
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const DELETE = withErrorHandling(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
     const result = await getAuthorizedShift(req, params);
 
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return errorResponse(result.error as string, result.status);
     }
 
     await result.shift.deleteOne();
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting shift:', error);
-    return NextResponse.json({ error: 'Failed to delete shift' }, { status: 500 });
   }
-}
+);

@@ -1,9 +1,9 @@
-import { Shift, ShiftFormData } from '@/types/shifts';
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import Modal from '@/components/common/Modal';
+import { Shift, ShiftFormData } from '@/types/models/shifts';
+import React from 'react';
+import ActionModal from '@/components/core/modals/ActionModal';
 import ShiftForm from './ShiftForm';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useSettings } from '@/hooks/api/useSettings';
+import { LoadingContainer } from '@/components/core/feedback/LoadingWrapper';
 
 interface ShiftModalProps {
   isOpen: boolean;
@@ -28,38 +28,26 @@ export default function ShiftModal({
   isSubmitting = false,
   allowOutsideClick = true,
 }: ShiftModalProps) {
-  const handleSubmit = async (data: ShiftFormData) => {
-    await onSubmit(data);
-    // Let the parent component handle closing
-    // onClose(); - Don't call onClose here
-  };
-
-  // Handle the close button click explicitly
-  const handleCloseClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    onClose();
-  };
-
-  // In this simplified version, the ShiftForm component will handle
-  // the delete functionality and any confirmations needed
+  const { isLoading: settingsLoading } = useSettings();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" allowOutsideClick={allowOutsideClick}>
-      <div className="modal-header bg-gray-800/60 backdrop-blur-md rounded-t-lg border-b border-gray-700/30 py-4 px-6 flex items-center justify-between -mx-6 -mt-6 mb-6">
-        <h2 className="text-xl font-semibold text-white">{title}</h2>
-        <div onClick={handleCloseClick} className="cursor-pointer" aria-label="Close">
-          <X className="h-5 w-5 text-gray-300 hover:text-white transition-colors" />
-        </div>
-      </div>
-
-      <ShiftForm
-        shift={shift}
-        onSubmit={handleSubmit}
-        onCancel={onClose}
-        onDelete={onDelete}
-        initialDate={initialDate}
-        isSubmitting={isSubmitting}
-      />
-    </Modal>
+    <ActionModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      size="xl"
+      allowOutsideClick={allowOutsideClick}
+      isSubmitting={isSubmitting}
+    >
+      <LoadingContainer isLoading={settingsLoading} minDisplayTime={300}>
+        <ShiftForm
+          shift={shift}
+          onSubmit={onSubmit}
+          onDelete={onDelete}
+          initialDate={initialDate}
+          isSubmitting={isSubmitting}
+        />
+      </LoadingContainer>
+    </ActionModal>
   );
 }

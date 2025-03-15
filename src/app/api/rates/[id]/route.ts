@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/databaseConnection';
-import Rate from '@/models/Rate';
-import Shift from '@/models/Shift';
-import { authOptions } from '@/lib/authConfig';
+import { connectToDatabase } from '@/lib/api/databaseConnection';
+import Rate from '@/schemas/Rate';
+import Shift from '@/schemas/Shift';
+import { authOptions } from '@/lib/api/authConfig';
 import mongoose from 'mongoose';
-import { withErrorHandling, errorResponse } from '@/lib/apiResponses';
+import { withErrorHandling, errorResponse } from '@/lib/api/apiResponses';
 
 // Helper for authentication and rate retrieval
 async function getAuthorizedRate(req: NextRequest, params: { id: string }) {
@@ -159,34 +159,35 @@ export const DELETE = withErrorHandling(
 
     const { rate } = result;
 
-    // Check if the rate is default
+    // Check if the rate is used in any shifts
+    const shiftsCount = await Shift.countDocuments({ rateId: rate._id });
+    if (shiftsCount > 0) {
+      return errorResponse(
+        `Cannot delete rate because it is used in ${shiftsCount} shifts. Please change the rate on those shifts before deleting.`,
+        400
+      );
+    }
+
+    // If this is a default rate, we need to handle it carefully
     if (rate.isDefault) {
-      // Check if there are other rates we can make default
+      // Find other rates for this employer
       const otherRates = await Rate.find({
         _id: { $ne: rate._id },
         userId: result.session.user.id,
         employerId: rate.employerId,
       }).sort({ createdAt: -1 });
 
-      if (otherRates.length > 0) {
-        // Make the most recently created rate the new default
-        const newDefault = otherRates[0];
-        newDefault.isDefault = true;
-        await newDefault.save();
-      } else {
-        // If this is the only rate, allow deletion (since there will be no rates left)
-        // But warn clients that they should create new rates
+      if (otherRates.length === 0) {
+        return errorResponse(
+          'Cannot delete the only rate for this employer. Each employer must have at least one rate.',
+          400
+        );
       }
-    }
 
-    // Check if the rate is used in any shifts
-    const shiftsCount = await Shift.countDocuments({ rateId: rate._id });
-    if (shiftsCount > 0) {
-      return errorResponse(
-        `Cannot delete rate because it is used in ${shiftsCount} shifts. 
-        Please change the rate on those shifts before deleting.`,
-        400
-      );
+      // Make the most recently created rate the new default
+      const newDefault = otherRates[0];
+      newDefault.isDefault = true;
+      await newDefault.save();
     }
 
     // Delete the rate

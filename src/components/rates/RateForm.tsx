@@ -1,27 +1,30 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useEmployers } from '@/hooks/useEmployers';
-import { Rate, RateFormData } from '@/types/rates';
+import { useEmployers } from '@/hooks/api/useEmployers';
+import { Rate, RateFormData } from '@/types/models/rates';
 import { format } from 'date-fns';
 import { Check, Trash2, Building2, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
+import { Button } from '@/components/ui/buttons/Button';
+import LoadingSpinner from '@/components/core/feedback/LoadingSpinner';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
+import { logError } from '@/lib/validation/errorHandlers';
 
 interface RateFormProps {
   rate?: Rate;
   employerId?: string;
   onSubmit: (data: RateFormData) => Promise<void>;
-  onCancel: () => void;
   onDelete?: (rateId: string) => void;
+  onCancel?: () => void;
+  isSubmitting?: boolean;
 }
 
 export default function RateForm({
   rate,
   employerId,
   onSubmit,
-  onCancel,
   onDelete,
+  onCancel,
+  isSubmitting = false,
 }: RateFormProps) {
   const { employers, isLoading: loadingEmployers } = useEmployers();
   const [isLoading, setIsLoading] = useState(false);
@@ -37,47 +40,24 @@ export default function RateForm({
       employerId: rate ? rate.employerId : employerId || '',
       name: rate?.name || '',
       baseRate: rate?.baseRate || 0,
-      currency: 'ILS', // Always use ILS
+      currency: 'ILS',
       effectiveDate: format(new Date(), 'yyyy-MM-dd'),
       isDefault: rate?.isDefault || false,
     },
   });
 
-  // Watch form values for calculations
-  const baseRate = watch('baseRate');
-  const currency = 'ILS'; // Always use ILS
+  // Watch form values for UI updates
   const selectedEmployerId = watch('employerId');
-
-  // Get currency symbol
-  const currencySymbol = '₪'; // Always use ILS symbol
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('he-IL', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
-
-  // Format number without currency symbol
-  const formatNumber = (amount: number) => {
-    return new Intl.NumberFormat('he-IL', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
 
   // Form submission handler
   const submitHandler = async (data: RateFormData) => {
     try {
       setIsLoading(true);
       data.effectiveDate = new Date();
-      data.currency = 'ILS'; // Ensure ILS is always used
+      data.currency = 'ILS';
       await onSubmit(data);
     } catch (error) {
-      console.error('Error submitting rate:', error);
+      logError('RateForm:Submit', error);
     } finally {
       setIsLoading(false);
     }
@@ -213,7 +193,7 @@ export default function RateForm({
             </div>
           </div>
 
-          {/* Hidden currency field (removed dropdown but keeping the field for form data) */}
+          {/* Hidden currency field (always ILS) */}
           <input type="hidden" {...register('currency')} value="ILS" />
         </div>
 
@@ -248,26 +228,23 @@ export default function RateForm({
         </div>
       </div>
 
-      {/* Form action buttons */}
-      <div className="flex justify-end space-x-3 pt-4 mt-6 border-t border-gray-700/50">
-        {/* Delete button - only show when editing an existing rate */}
-        {rate && onDelete && (
-          <Button type="button" onClick={() => onDelete(rate._id)} variant="danger">
-            <Trash2 className="h-4 w-4 mr-2" />
+      {/* Form actions */}
+      <div className="flex justify-end space-x-3">
+        {onDelete && rate && (
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => onDelete(rate._id)}
+            disabled={isLoading || rate.isDefault}
+            className="flex items-center"
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
             Delete
           </Button>
         )}
-
-        {/* Submit button */}
-        <Button type="submit" disabled={isLoading} variant="primary">
-          {isLoading ? (
-            <LoadingSpinner size="sm" />
-          ) : (
-            <>
-              <Check className="h-4 w-4 mr-2" />
-              {rate ? 'Update' : 'Create'}
-            </>
-          )}
+        <Button type="submit" variant="primary" disabled={isLoading} className="flex items-center">
+          {isLoading ? <LoadingSpinner size="sm" /> : <Check className="h-4 w-4 mr-1.5" />}
+          {rate ? 'Update' : 'Create'}
         </Button>
       </div>
     </form>

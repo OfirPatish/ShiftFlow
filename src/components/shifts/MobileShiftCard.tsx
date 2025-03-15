@@ -1,6 +1,6 @@
-import { Shift } from '@/types/shifts';
+import { Shift } from '@/types/models/shifts';
 import { Clock, MoreHorizontal, Calendar } from 'lucide-react';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
 
 interface MobileShiftCardProps {
   shift: Shift;

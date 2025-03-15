@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { connectToDatabase } from '@/lib/databaseConnection';
-import Rate from '@/models/Rate';
-import { authOptions } from '@/lib/authConfig';
+import { connectToDatabase } from '@/lib/api/databaseConnection';
+import Rate from '@/schemas/Rate';
+import { authOptions } from '@/lib/api/authConfig';
 import mongoose from 'mongoose';
-import { withErrorHandling, errorResponse } from '@/lib/apiResponses';
+import { withErrorHandling, errorResponse } from '@/lib/api/apiResponses';
 
 // GET /api/rates - Get all rates for the current user, optionally filtered by employer
 export const GET = withErrorHandling(async (req: NextRequest) => {

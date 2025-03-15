@@ -1,144 +1,142 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useEmployers } from '@/hooks/useEmployers';
-import { Employer, EmployerFormData } from '@/types/employers';
+import { useState, useEffect, useRef } from 'react';
+import { useEmployers } from '@/hooks/api/useEmployers';
+import { Employer } from '@/types/models/employers';
 import EmployerCard from '@/components/employers/EmployerCard';
-import EmptyEmployers from '@/components/employers/EmptyEmployers';
 import EmployerModal from '@/components/employers/EmployerModal';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
-import { showSuccessToast, showErrorToast } from '@/lib/notificationToasts';
-import LoadingSpinner, { FullPageSpinner } from '@/components/common/LoadingSpinner';
-import { Button } from '@/components/ui/Button';
-import { Search, Plus } from 'lucide-react';
+import ConfirmDialog from '@/components/core/modals/ConfirmDialog';
+import { showSuccessToast, showErrorToast } from '@/lib/utils/notificationToasts';
+import { FullPageSpinner } from '@/components/core/feedback/LoadingSpinner';
+import EmptyEmployers from '@/components/employers/EmptyEmployers';
+import PageLayout from '@/components/layout/templates/PageLayout';
+import { EmployerFormData } from '@/types/models/employers';
 
 export default function Employers() {
   const {
     employers,
     isLoading: apiLoading,
-    error,
+    isSubmitting: apiSubmitting,
     createEmployer,
     updateEmployer,
     deleteEmployer,
   } = useEmployers();
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentEmployer, setCurrentEmployer] = useState<Employer | undefined>();
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [currentEmployer, setCurrentEmployer] = useState<Employer | null>(null);
   const [employerToDelete, setEmployerToDelete] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredEmployers, setFilteredEmployers] = useState<Employer[]>([]);
-
-  // Controlled loading state that ensures minimum display time
   const [isLoading, setIsLoading] = useState(true);
-  const minLoadingTime = 1000; // 1 second
+  const initialLoadRef = useRef(true);
 
   // Handle loading state with minimum display time
   useEffect(() => {
-    if (apiLoading) {
-      setIsLoading(true);
-    } else {
-      // When API loading is done, wait for minimum display time
+    if (!apiLoading && initialLoadRef.current) {
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, minLoadingTime);
+        initialLoadRef.current = false;
+      }, 1000); // 1 second minimum loading time
 
       return () => clearTimeout(timer);
     }
-  }, [apiLoading, minLoadingTime]);
+  }, [apiLoading]);
 
-  // Open modal for adding a new employer
-  const handleAddEmployer = () => {
-    setCurrentEmployer(null);
-    setIsFormModalOpen(true);
-  };
-
-  // Open modal for editing an existing employer
-  const handleEditEmployer = (employer: Employer) => {
-    setCurrentEmployer(employer);
-    setIsFormModalOpen(true);
-  };
-
-  // Prompt to confirm deletion
-  const handleDeleteClick = (employerId: string) => {
-    setEmployerToDelete(employerId);
-    setIsDeleteConfirmOpen(true);
-  };
-
-  // Handle the actual deletion after confirmation
-  const handleConfirmDelete = async () => {
-    if (!employerToDelete) return;
-
-    try {
-      await deleteEmployer(employerToDelete);
-      showSuccessToast('Employer deleted successfully');
+  // Cleanup effect for modal state
+  useEffect(() => {
+    return () => {
+      setIsModalOpen(false);
+      setCurrentEmployer(undefined);
+      setIsSubmitting(false);
       setIsDeleteConfirmOpen(false);
       setEmployerToDelete(null);
-      // Close the form modal
-      setIsFormModalOpen(false);
-      // Add delay for state reset to prevent UI glitches
+    };
+  }, []);
+
+  const handleAddEmployer = () => {
+    setCurrentEmployer(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditEmployer = (employer: Employer) => {
+    setCurrentEmployer(employer);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    if (!isDeleteConfirmOpen && !isSubmitting && !apiSubmitting) {
+      setIsModalOpen(false);
       setTimeout(() => {
-        setCurrentEmployer(null);
+        setCurrentEmployer(undefined);
+        setIsSubmitting(false);
       }, 300);
-    } catch (error: any) {
-      showErrorToast(error.message || 'Failed to delete employer');
     }
   };
 
-  // Handle form submission for both create and update
-  const handleSubmit = async (formData: EmployerFormData) => {
+  const handleSubmitEmployer = async (data: EmployerFormData) => {
+    if (isSubmitting || apiSubmitting) return;
+
     setIsSubmitting(true);
     try {
       if (currentEmployer) {
-        await updateEmployer(currentEmployer._id, formData);
+        await updateEmployer(currentEmployer._id, data);
         showSuccessToast('Employer updated successfully');
       } else {
-        await createEmployer(formData);
+        await createEmployer(data);
         showSuccessToast('Employer created successfully');
       }
-      // First close the modal
-      setIsFormModalOpen(false);
-      // Then reset current employer with a delay to prevent UI glitches
-      setTimeout(() => {
-        setCurrentEmployer(null);
-      }, 300);
-    } catch (error: any) {
-      showErrorToast(error.message || 'Failed to save employer');
+      handleCloseModal();
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : 'Failed to save employer');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // This is the key modification: Prevent closing the form modal when the delete confirm dialog is open
-  const handleCloseFormModal = () => {
-    // Only close the form modal if the delete confirmation dialog is not open
-    if (!isDeleteConfirmOpen) {
-      setIsFormModalOpen(false);
-      // Add delay for state reset to prevent UI glitches
-      setTimeout(() => {
-        setCurrentEmployer(null);
-      }, 300);
+  const handleDeleteClick = (employerId: string) => {
+    if (!isSubmitting && !apiSubmitting) {
+      setEmployerToDelete(employerId);
+      setIsDeleteConfirmOpen(true);
     }
   };
 
-  // Always show loading indicator first
+  const handleConfirmDelete = async () => {
+    if (!employerToDelete || isSubmitting || apiSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await deleteEmployer(employerToDelete);
+      showSuccessToast('Employer deleted successfully');
+      setIsDeleteConfirmOpen(false);
+      setEmployerToDelete(null);
+      setIsModalOpen(false);
+      setTimeout(() => {
+        setCurrentEmployer(undefined);
+        setIsSubmitting(false);
+      }, 300);
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : 'Failed to delete employer');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteConfirmOpen(false);
+    setEmployerToDelete(null);
+  };
+
   if (isLoading) {
     return <FullPageSpinner />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-16 xl:px-24">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100 mb-2">Employers</h1>
-          <p className="text-gray-400">Manage your employers and work locations</p>
-        </div>
-        <Button onClick={handleAddEmployer} variant="primary">
-          Add Employer
-        </Button>
-      </div>
-
-      {/* Employers list or empty state */}
+    <PageLayout
+      title="Employers"
+      subtitle="Manage your employers and their details"
+      actionLabel="Add Employer"
+      onAction={handleAddEmployer}
+    >
       {employers.length === 0 ? (
         <EmptyEmployers onAddAction={handleAddEmployer} />
       ) : (
@@ -148,33 +146,31 @@ export default function Employers() {
               key={employer._id}
               employer={employer}
               onEdit={() => handleEditEmployer(employer)}
-              onDelete={() => handleDeleteClick(employer._id)}
             />
           ))}
         </div>
       )}
 
-      {/* Add/Edit Employer Modal */}
+      {/* Employer modal for add/edit */}
       <EmployerModal
-        isOpen={isFormModalOpen}
-        onClose={handleCloseFormModal}
-        onSubmit={handleSubmit}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitEmployer}
         title={currentEmployer ? 'Edit Employer' : 'Add New Employer'}
-        employer={currentEmployer || undefined}
-        onDelete={handleDeleteClick}
-        isSubmitting={isSubmitting}
+        employer={currentEmployer}
+        isSubmitting={isSubmitting || apiSubmitting}
+        onDelete={currentEmployer ? handleDeleteClick : undefined}
+        allowOutsideClick={!isSubmitting && !apiSubmitting}
       />
 
       {/* Confirm Delete Dialog */}
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        onClose={() => setIsDeleteConfirmOpen(false)}
+        onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
         title="Delete Employer"
-        message="Are you sure you want to delete this employer? This action cannot be undone."
-        confirmText="Delete"
-        isDestructive={true}
+        message="Are you sure you want to delete this employer? This action cannot be undone. Make sure to delete all associated pay rates first."
       />
-    </div>
+    </PageLayout>
   );
 }

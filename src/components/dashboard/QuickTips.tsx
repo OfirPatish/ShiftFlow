@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
-import { MonthlyStats } from '@/types/dashboard';
+import { MonthlyStats } from '@/types/ui/dashboard';
 
 interface QuickTipsProps {
   monthlyStats?: MonthlyStats;
@@ -66,7 +66,7 @@ export default function QuickTips({ monthlyStats }: QuickTipsProps) {
   if (insights.length === 0) return null;
 
   return (
-    <div className="mt-8 bg-gray-800/20 backdrop-blur-sm border border-gray-700/20 rounded-lg p-5 max-w-6xl mx-auto hover:bg-gray-800/30 transition-all duration-300">
+    <>
       <div
         className="flex items-center justify-between cursor-pointer pb-2 border-b border-gray-700/20"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -114,6 +114,6 @@ export default function QuickTips({ monthlyStats }: QuickTipsProps) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

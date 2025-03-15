@@ -1,5 +1,14 @@
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import { getCurrencySymbol } from '@/lib/currencyFormatter';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Cell,
+  TooltipProps,
+} from 'recharts';
+import { getCurrencySymbol } from '@/lib/utils/currencyFormatter';
 
 // Tax bracket structure based on 2025 data for Israel - MONTHLY values (yearly values divided by 12)
 const TAX_BRACKETS_2025_MONTHLY = [
@@ -62,7 +71,7 @@ const TAX_BRACKETS_2025_MONTHLY = [
 ];
 
 interface TaxBracketChartProps {
-  monthlyIncome?: number;
+  monthlyIncome: number;
 }
 
 /**
@@ -93,7 +102,7 @@ export default function TaxBracketChart({ monthlyIncome }: TaxBracketChartProps)
   const currentBracket = getCurrentBracket();
 
   // Custom tooltip for the tax chart
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -118,10 +127,9 @@ export default function TaxBracketChart({ monthlyIncome }: TaxBracketChartProps)
   }));
 
   return (
-    <div className="mt-6 bg-gray-800/20 backdrop-blur-sm border border-gray-700/20 rounded-lg p-5 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-3">
+    <>
+      <div className="flex items-center justify-between pb-2 border-b border-gray-700/20">
         <h3 className="text-base font-medium text-gray-100">2025 Israel Tax Brackets (Monthly)</h3>
-
         {income > 0 && (
           <div className="text-xs text-gray-400">
             Monthly Income:{' '}
@@ -206,6 +214,6 @@ export default function TaxBracketChart({ monthlyIncome }: TaxBracketChartProps)
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

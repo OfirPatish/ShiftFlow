@@ -1,10 +1,6 @@
-import EmptyState from '@/components/common/EmptyState';
+import EmptyState from '@/components/core/feedback/EmptyState';
 
-interface EmptyRatesProps {
-  onAddAction?: () => void;
-}
-
-export default function EmptyRates({ onAddAction }: EmptyRatesProps) {
+export default function EmptyRates() {
   return (
     <EmptyState
       title="No Rates Found"

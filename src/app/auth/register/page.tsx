@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRegister } from '@/hooks/useRegister';
+import { useRegister } from '@/hooks/ui/useRegister';
 import {
   FormField,
   PasswordToggle,

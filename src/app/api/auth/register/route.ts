@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import User from '@/models/User';
-import { connectToDatabase } from '@/lib/databaseConnection';
-import { logError } from '@/lib/errorHandlers';
-import { errorResponse, withErrorHandling } from '@/lib/apiResponses';
+import User from '@/schemas/User';
+import { connectToDatabase } from '@/lib/api/databaseConnection';
+import { logError } from '@/lib/validation/errorHandlers';
+import { errorResponse, withErrorHandling } from '@/lib/api/apiResponses';
 
 // User registration schema validation
 const userSchema = z.object({
