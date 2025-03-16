@@ -224,6 +224,7 @@ export default function RegisterPage() {
           Already have an account?{' '}
           <Link
             href="/auth/login"
+            prefetch={true}
             className="font-medium text-primary hover:text-primary-light transition-colors"
           >
             Sign in

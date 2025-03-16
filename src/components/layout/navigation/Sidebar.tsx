@@ -87,6 +87,7 @@ const Sidebar = () => {
           <Link
             key={item.name}
             href={item.href}
+            prefetch={true}
             className={`
               flex items-center py-2 rounded-md text-sm outline-none sidebar-link transition-colors duration-200
               ${
@@ -126,6 +127,7 @@ const Sidebar = () => {
             >
               <Link
                 href="/settings/profile"
+                prefetch={true}
                 className="block px-4 py-2 text-sm text-gray-300 hover:bg-theme-lighter hover:text-white flex items-center outline-none sidebar-link"
                 onClick={() => setIsDropdownOpen(false)}
               >

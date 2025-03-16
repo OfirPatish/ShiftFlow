@@ -34,6 +34,7 @@ export default function WelcomeTutorial() {
           </p>
           <Link
             href="/employers"
+            prefetch={true}
             className="text-primary-light hover:text-primary text-sm flex items-center group-hover:underline"
           >
             Add employers <ArrowRight className="ml-1 w-4 h-4" />
@@ -55,6 +56,7 @@ export default function WelcomeTutorial() {
           </p>
           <Link
             href="/rates"
+            prefetch={true}
             className="text-blue-400 hover:text-blue-300 text-sm flex items-center group-hover:underline"
           >
             Configure rates <ArrowRight className="ml-1 w-4 h-4" />
@@ -76,6 +78,7 @@ export default function WelcomeTutorial() {
           </p>
           <Link
             href="/shifts"
+            prefetch={true}
             className="text-green-400 hover:text-green-300 text-sm flex items-center group-hover:underline"
           >
             Track shifts <ArrowRight className="ml-1 w-4 h-4" />

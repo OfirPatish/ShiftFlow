@@ -6,7 +6,7 @@
   --foreground-rgb: 255, 255, 255;
   --background-rgb: 5, 5, 10; /* #05050a - our theme color */
   --card-bg-rgb: 10, 10, 20; /* #0a0a14 - our theme-lighter color */
-  --border-rgb: 26, 26, 36; /* #1a1a24 - our theme-border color */
+  --border-rgb: 59, 59, 84; /* #3b3b54 - our theme-border color */
   --input-bg-rgb: 10, 10, 20; /* Same as card background */
   --input-text-rgb: 229, 231, 235;
   --primary-rgb: 14, 165, 233; /* primary-400 */

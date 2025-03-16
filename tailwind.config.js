@@ -39,7 +39,7 @@ module.exports = {
           light: '#07070f',
           lighter: '#0a0a14',
           dark: '#030305',
-          border: '#1a1a24',
+          border: '#3b3b54',
         },
         accent: {
           blue: {

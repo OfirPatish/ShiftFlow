@@ -136,6 +136,7 @@ export default function LoginPage() {
           Don&apos;t have an account?{' '}
           <Link
             href="/auth/register"
+            prefetch={true}
             className="font-medium text-primary hover:text-primary-light transition-colors"
           >
             Sign up now

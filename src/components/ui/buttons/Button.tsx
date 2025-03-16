@@ -91,6 +91,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       return (
         <Link
           href={href}
+          prefetch={true}
           className={cn(
             buttonVariants({
               variant,

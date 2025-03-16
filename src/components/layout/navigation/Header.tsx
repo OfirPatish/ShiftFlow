@@ -114,6 +114,7 @@ const Header = () => {
                 </div>
                 <Link
                   href="/settings/profile"
+                  prefetch={true}
                   className="block px-4 py-2 text-sm text-gray-300 hover:bg-theme-lighter hover:text-white flex items-center outline-none"
                   onClick={() => setIsProfileDropdownOpen(false)}
                 >
@@ -140,6 +141,7 @@ const Header = () => {
           {currentEmployer && (
             <Link
               href="/settings"
+              prefetch={true}
               className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white transition-colors px-2 py-0.5 rounded-l"
             >
               <Building2 className="h-3.5 w-3.5 text-primary-400" />
@@ -150,6 +152,7 @@ const Header = () => {
           {currentRate && (
             <Link
               href="/settings"
+              prefetch={true}
               className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white transition-colors px-2 pr-4 py-0.5 rounded-l"
             >
               <DollarSign className="h-3.5 w-3.5 text-green-400" />
